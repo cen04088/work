@@ -22,7 +22,11 @@
 <div id="mobile-wrapper">
   <!-- 상단 헤더 -->
   <header>
-    <a href="{% url 'core:home' %}" class="home-btn" title="홈으로 가기">🏠</a>
+    <a href="{% url 'core:home' %}" class="home-btn" title="홈으로 가기">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+      </svg>
+    </a>
     <span class="header-title">{% block header_title %}현장이음{% endblock %}</span>
   </header>
   

@@ -29,21 +29,25 @@
 {% block content %}
 <div id="chat-wrap">
   <!-- 안내 말풍선 -->
-  <div class="bubble bot" style="word-break: keep-all;">
-    안녕하세요! 저는 <strong>현장이음 AI 상담사</strong>입니다. 😊<br><br>
-    건설 현장 관련 궁금한 점을 편하게 물어보세요.<br><br>
-    <span style="font-size: 15px; color: var(--text-sub); line-height: 1.8;">
-      예) "퇴직공제금 어떻게 받아요?"<br>
-      예) "취업지원센터 연락처 알려줘"<br>
-      예) "건강검진 신청 방법이 뭐예요?"
-    </span>
+  <div class="bubble bot" style="word-break: keep-all; padding: 14px 16px 6px 16px;">
+    <p style="margin: 0 0 4px 0; font-weight: 700;">안녕하세요! 현장이음 AI 상담사입니다. 😊</p>
+    <p style="margin: 0 0 6px 0; color: var(--text); font-size: 16px;">건설 현장 관련 궁금한 점을 물어보세요.</p>
+    <div style="font-size: 16px; color: var(--text); line-height: 1.6; border-top: 1px solid var(--border-light); padding-top: 6px;">
+      💬 "퇴직공제금 어떻게 받아요?"<br>
+      💬 "취업지원센터 연락처 알려줘"<br>
+      💬 "건강검진 신청 방법이 뭐예요?"
+    </div>
   </div>
 </div>
 
 <!-- 입력 바 -->
 <div class="chat-input-bar">
   {% csrf_token %}
-  <button id="voiceBtn" onclick="startVoiceInput()" class="btn-voice" title="음성으로 말하기">🎤</button>
+  <button id="voiceBtn" onclick="startVoiceInput()" class="btn-voice" title="음성으로 말하기">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1 1.93c-3.94-.49-7-3.85-7-7.93H2c0 4.97 3.66 9.09 8.5 9.82V21h3v-3.25c4.84-.73 8.5-4.85 8.5-9.82h-2c0 4.08-3.06 7.44-7 7.93V16h-1v-.07z"/>
+    </svg>
+  </button>
   <input
     type="text"
     id="chat-input"

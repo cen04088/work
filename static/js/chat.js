@@ -77,10 +77,14 @@ function startVoiceInput() {
   recognition.lang = "ko-KR";
 
   recognition.onstart = () => {
-    if (btn) btn.textContent = "🔴";
+    if (btn) btn.style.background = 'rgba(192, 57, 43, 0.12)';
+    if (btn) btn.style.borderColor = 'rgba(192, 57, 43, 0.4)';
+    if (btn) btn.style.color = '#C0392B';
   };
   recognition.onend = () => {
-    if (btn) btn.textContent = "🎤";
+    if (btn) btn.style.background = '';
+    if (btn) btn.style.borderColor = '';
+    if (btn) btn.style.color = '';
   };
   recognition.onresult = e => {
     const text = e.results[0][0].transcript;
