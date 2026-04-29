@@ -1,0 +1,57 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>현장이음 - {% block title %}홈{% endblock %}</title>
+  
+  <!-- Noto Sans KR Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="{% static 'css/main.css' %}">
+  
+  <!-- Kakao Map API -->
+  <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey={{ settings.KAKAO_JS_KEY }}&libraries=services"></script>
+  
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+<div id="mobile-wrapper">
+  <!-- 상단 헤더 -->
+  <header>
+    <a href="{% url 'core:home' %}" class="home-btn" title="홈으로 가기">🏠</a>
+    <span class="header-title">{% block header_title %}현장이음{% endblock %}</span>
+  </header>
+  
+  <!-- 메인 콘텐츠 영역 -->
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+  
+  <!-- 하단 탭바 -->
+  <nav class="bottom-nav">
+    <a href="{% url 'jobs:list' %}" class="{% if request.resolver_match.app_name == 'jobs' %}active{% endif %}">
+      <span class="icon">💼</span>
+      <span>일자리</span>
+    </a>
+    <a href="{% url 'health:map' %}" class="{% if request.resolver_match.app_name == 'health' %}active{% endif %}">
+      <span class="icon">🏥</span>
+      <span>건강·안전</span>
+    </a>
+    <a href="{% url 'pension:search' %}" class="{% if request.resolver_match.app_name == 'pension' %}active{% endif %}">
+      <span class="icon">💰</span>
+      <span>퇴직공제</span>
+    </a>
+    <a href="{% url 'chatbot:chat' %}" class="{% if request.resolver_match.app_name == 'chatbot' %}active{% endif %}">
+      <span class="icon">💬</span>
+      <span>AI상담</span>
+    </a>
+  </nav>
+
+  {% block extra_js %}{% endblock %}
+</div>
+</body>
+</html>

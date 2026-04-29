@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+.Python
+
+# 가상환경
+venv/
+env/
+.venv/
+ENV/
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+
+# 환경변수 (API 키 등 노출 금지)
+.env
+.env.*
+*.env
+
+# 정적 파일 수집 결과
+/staticfiles/
+/collected_static/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 작업 임시 폴더
+work/

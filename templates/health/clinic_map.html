@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}건강·안전{% endblock %}
+{% block header_title %}무료 건강검진 안내{% endblock %}
+
+{% block content %}
+
+<!-- 안내 배너 -->
+<div class="info-box" style="margin-bottom: 20px;">
+  <div class="info-title">🎁 건설근로자 종합건강검진 — 전액 무료!</div>
+  <ul>
+    <li><strong>비용</strong> 본인 부담금 0원 (공제회 전액 지원)</li>
+    <li><strong>대상</strong> 퇴직공제 총 적립일수 252일 이상, 직전 연도 근로내역 1일 이상인 근로자</li>
+  </ul>
+  <a href="https://cw.or.kr/" target="_blank" class="btn-primary" style="height: 48px; font-size: 15px; background: var(--primary-light);">
+    📋 내가 혜택 대상인지 확인하기 (건설e음)
+  </a>
+</div>
+
+<!-- 지역 선택 -->
+<p class="section-desc" style="margin-bottom: 8px;">지역을 선택하면 해당 지역의 검진 기관 목록이 나타납니다.</p>
+<select id="regionSelect" class="search-input" onchange="loadClinics()" style="margin-bottom: 0;">
+  <option value="">== 지역을 선택해주세요 ==</option>
+  <option value="서울">서울</option>
+  <option value="경기">경기</option>
+  <option value="인천">인천</option>
+  <option value="강원">강원</option>
+  <option value="대전">대전</option>
+  <option value="충남">충남</option>
+  <option value="충북">충북</option>
+  <option value="세종">세종</option>
+  <option value="광주">광주</option>
+  <option value="전남">전남</option>
+  <option value="전북">전북</option>
+  <option value="대구">대구</option>
+  <option value="경북">경북</option>
+  <option value="부산">부산</option>
+  <option value="울산">울산</option>
+  <option value="경남">경남</option>
+  <option value="제주">제주</option>
+</select>
+
+<!-- 기관 목록 -->
+<div id="clinicsList" style="margin-top: 16px;">
+  <div class="empty-state">
+    <div class="empty-icon">🗺️</div>
+    <p>위에서 지역을 선택하면<br>검진 기관 목록이 나타납니다.</p>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+async function loadClinics() {
+    const region = document.getElementById("regionSelect").value;
+    const listContainer = document.getElementById("clinicsList");
+    
+    if (!region) {
+        listContainer.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">🗺️</div>
+            <p>위에서 지역을 선택하면<br>검진 기관 목록이 나타납니다.</p>
+          </div>`;
+        return;
+    }
+    
+    listContainer.innerHTML = '<div class="spinner"></div><div class="loading-msg">검진 기관을 불러오고 있습니다...</div>';
+    
+    try {
+        const res = await fetch(`/health/api/clinics/?region=${encodeURIComponent(region)}`);
+        const data = await res.json();
+        
+        if (data.clinics && data.clinics.length > 0) {
+            let listHtml = `<p style="font-size:13px; font-weight:700; color:var(--text-sub); margin-bottom:10px;">${region} 지역 검진 기관 ${data.clinics.length}곳</p>`;
+            
+            data.clinics.forEach(c => {
+                const mapQuery = encodeURIComponent(c.address + " " + c.name);
+                
+                listHtml += `
+                <div class="job-card">
+                  <div class="company" style="margin-bottom: 6px;">🏥 ${c.name}</div>
+                  <div class="meta">📍 ${c.address}</div>
+                  <div style="display: flex; gap: 8px; margin-top: 14px;">
+                    <a href="tel:${c.phone}" class="btn-success" style="flex:1; height:48px; font-size:15px; border-radius: var(--radius-md);">
+                      📞 전화걸기
+                    </a>
+                    <a href="https://map.kakao.com/link/search/${mapQuery}" target="_blank"
+                       style="flex:1; height:48px; background:#FEE500; color:#1A1A2E; font-size:15px; font-weight:700;
+                              border-radius:var(--radius-md); display:flex; align-items:center; justify-content:center;
+                              text-decoration:none; gap:6px;">
+                      🗺️ 카카오맵
+                    </a>
+                  </div>
+                </div>
+                `;
+            });
+            
+            listContainer.innerHTML = listHtml;
+        } else {
+            listContainer.innerHTML = `
+              <div class="empty-state">
+                <div class="empty-icon">😥</div>
+                <p>해당 지역에 등록된 검진 기관이 없습니다.</p>
+              </div>`;
+        }
+    } catch (e) {
+        console.error("검진기관 로딩 실패", e);
+        listContainer.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">⚠️</div>
+            <p style="color: var(--warning);">오류가 발생했습니다.<br>잠시 후 다시 시도해주세요.</p>
+          </div>`;
+    }
+}
+</script>
+{% endblock %}

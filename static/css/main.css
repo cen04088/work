@@ -1,0 +1,581 @@
+/* ========================================
+   현장이음 — 메인 스타일시트
+   톤: 신뢰/안내 중심 (네이비 + 앰버 포인트)
+   ======================================== */
+
+/* ── 1. 디자인 토큰 ── */
+:root {
+  /* 주색: 진한 네이비 (신뢰감) */
+  --primary:        #1B3D6F;
+  --primary-light:  #2A5BA8;
+  --primary-dark:   #102748;
+
+  /* 포인트: 앰버/오렌지 (현장 활력) */
+  --accent:         #F5A623;
+  --accent-dark:    #D4870A;
+  --accent-light:   #FFF3DC;
+
+  /* 성공·위험 */
+  --success:        #1E7E4A;
+  --success-light:  #E6F5EC;
+  --warning:        #C0392B;
+  --warning-light:  #FDECEA;
+
+  /* 배경 & 표면 */
+  --bg:             #F2F4F8;
+  --card-bg:        #FFFFFF;
+  --border:         #D8DCE6;
+  --border-light:   #EAECF2;
+
+  /* 텍스트 */
+  --text:           #1A1A2E;
+  --text-sub:       #5A6376;
+  --text-muted:     #9AA1B2;
+
+  /* 타이포 */
+  --font-size-xs:   14px;
+  --font-size-sm:   16px;
+  --font-size-base: 18px;
+  --font-size-lg:   20px;
+  --font-size-xl:   24px;
+  --font-size-xxl:  28px;
+
+  /* 반경 */
+  --radius-sm:  8px;
+  --radius-md:  14px;
+  --radius-lg:  20px;
+
+  /* 그림자 */
+  --shadow-sm:  0 1px 4px rgba(27,61,111,0.08);
+  --shadow-md:  0 4px 16px rgba(27,61,111,0.12);
+  --shadow-lg:  0 8px 32px rgba(27,61,111,0.16);
+}
+
+/* ── 2. 리셋 & 기본 ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: var(--font-size-base);
+  color: var(--text);
+  background: #C9CDD8;
+  line-height: 1.6;
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+/* ── 3. 모바일 래퍼 ── */
+#mobile-wrapper {
+  width: 100%;
+  max-width: 480px;
+  min-height: 100vh;
+  background: var(--bg);
+  position: relative;
+  box-shadow: 0 0 40px rgba(0,0,0,0.18);
+  padding-bottom: 80px;
+}
+
+/* ── 4. 상단 헤더 ── */
+header {
+  background: var(--primary);
+  color: #fff;
+  padding: 0 16px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  max-width: 480px;
+  margin: 0 auto;
+  box-shadow: 0 2px 8px rgba(27,61,111,0.3);
+}
+
+header .home-btn {
+  position: absolute;
+  left: 14px;
+  color: rgba(255,255,255,0.85);
+  text-decoration: none;
+  font-size: 22px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+header .home-btn:active { background: rgba(255,255,255,0.15); }
+
+header .header-title {
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+/* ── 5. 메인 콘텐츠 ── */
+main { padding: 16px; }
+
+/* ── 6. 섹션 타이틀 ── */
+.section-title {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 6px;
+  letter-spacing: -0.5px;
+}
+.section-desc {
+  font-size: var(--font-size-sm);
+  color: var(--text-sub);
+  line-height: 1.55;
+}
+
+/* ── 7. 카드 ── */
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s, transform 0.15s;
+}
+.card:active { transform: scale(0.985); box-shadow: var(--shadow-sm); }
+
+/* job-card 은 card 와 같이 사용 */
+.job-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow-sm);
+}
+.job-card .company  { font-size: var(--font-size-lg); font-weight: 700; color: var(--text); }
+.job-card .meta     { font-size: var(--font-size-sm); color: var(--text-sub); margin-top: 5px; }
+.job-card .wage     { font-size: var(--font-size-lg); color: var(--primary-light); font-weight: 700; margin-top: 8px; }
+
+/* ── 8. 버튼 ── */
+.btn-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 54px;
+  background: var(--primary);
+  color: #fff;
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  text-decoration: none;
+  gap: 8px;
+  letter-spacing: -0.2px;
+  transition: background 0.18s, transform 0.12s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-primary:active { background: var(--primary-dark); transform: scale(0.97); }
+
+.btn-accent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 54px;
+  background: var(--accent);
+  color: #1A1A2E;
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  text-decoration: none;
+  gap: 8px;
+  transition: background 0.18s, transform 0.12s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-accent:active { background: var(--accent-dark); transform: scale(0.97); }
+
+.btn-success {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 52px;
+  background: var(--success);
+  color: #fff;
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: background 0.18s, transform 0.12s;
+}
+.btn-success:active { background: #165E37; transform: scale(0.97); }
+
+.call-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 52px;
+  background: var(--success);
+  color: #fff;
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  border-radius: var(--radius-md);
+  margin-top: 12px;
+  text-decoration: none;
+  transition: background 0.18s, transform 0.12s;
+}
+.call-btn:active { background: #165E37; transform: scale(0.97); }
+
+/* ── 9. 입력 ── */
+.search-input {
+  width: 100%;
+  height: 54px;
+  font-size: var(--font-size-base);
+  font-family: 'Noto Sans KR', sans-serif;
+  color: var(--text);
+  padding: 0 16px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  outline: none;
+  background: #fff;
+  margin-bottom: 12px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.search-input:focus {
+  border-color: var(--primary-light);
+  box-shadow: 0 0 0 3px rgba(42,91,168,0.12);
+}
+
+/* ── 10. 안내 배너 (info-box) ── */
+.info-box {
+  background: linear-gradient(135deg, #E8EEF8 0%, #F0F4FC 100%);
+  border: 1px solid #C5D3EE;
+  border-left: 4px solid var(--primary-light);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  margin-bottom: 18px;
+}
+.info-box .info-title {
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.info-box ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px 0;
+}
+.info-box ul li {
+  font-size: var(--font-size-sm);
+  color: var(--text);
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(27,61,111,0.06);
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  line-height: 1.55;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+.info-box ul li:last-child { border-bottom: none; }
+.info-box ul li::before { content: "▪"; color: var(--primary-light); flex-shrink: 0; margin-top: 2px; }
+
+/* ── 11. 태그 & 배지 ── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+}
+.badge-success { background: var(--success-light); color: var(--success); }
+.badge-warning  { background: var(--warning-light);  color: var(--warning); }
+.badge-accent   { background: var(--accent-light);   color: var(--accent-dark); }
+.badge-primary  { background: #E0E9FF; color: var(--primary); }
+
+.type-badge {
+  display: inline-block;
+  background: var(--warning);
+  color: #fff;
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-bottom: 8px;
+}
+
+/* ── 12. 알림 카드 ── */
+.alert-card {
+  background: #FFFBF0;
+  border: 1px solid #FFE0A0;
+  border-left: 4px solid var(--accent);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+/* ── 13. 하단 탭바 ── */
+.bottom-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 72px;
+  background: #fff;
+  border-top: 1px solid var(--border);
+  display: flex;
+  z-index: 200;
+  max-width: 480px;
+  margin: 0 auto;
+  box-shadow: 0 -2px 12px rgba(27,61,111,0.08);
+}
+.bottom-nav a {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  text-decoration: none;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 500;
+  position: relative;
+  transition: color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.bottom-nav a.active { color: var(--primary); }
+.bottom-nav a.active::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 20%; right: 20%;
+  height: 3px;
+  background: var(--primary);
+  border-radius: 0 0 4px 4px;
+}
+.bottom-nav .icon { font-size: 22px; }
+.bottom-nav a span:last-child { font-size: 11px; font-weight: 700; }
+
+/* ── 14. 채팅 UI ── */
+.chat-wrap {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 56px - 72px - 70px);
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
+.bubble {
+  max-width: 85%;
+  padding: 13px 17px;
+  border-radius: 18px;
+  margin-bottom: 10px;
+  font-size: var(--font-size-base);
+  line-height: 1.7;
+  word-wrap: break-word;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  animation: bubbleFade 0.25s ease-out;
+}
+@keyframes bubbleFade {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.bubble.user {
+  background: var(--primary);
+  color: #fff;
+  margin-left: auto;
+  border-bottom-right-radius: 4px;
+  box-shadow: var(--shadow-sm);
+}
+.bubble.bot {
+  background: #fff;
+  border: 1px solid var(--border-light);
+  color: var(--text);
+  margin-right: auto;
+  border-bottom-left-radius: 4px;
+  box-shadow: var(--shadow-sm);
+}
+
+/* 채팅 입력 바 */
+.chat-input-bar {
+  position: fixed;
+  bottom: 72px; left: 0; right: 0;
+  padding: 10px 14px;
+  background: #fff;
+  border-top: 1px solid var(--border-light);
+  display: flex;
+  gap: 8px;
+  max-width: 480px;
+  margin: 0 auto;
+  box-shadow: 0 -2px 8px rgba(27,61,111,0.06);
+}
+.chat-input-bar .chat-input {
+  flex: 1;
+  height: 48px;
+  font-size: var(--font-size-sm);
+  font-family: 'Noto Sans KR', sans-serif;
+  padding: 0 14px;
+  border: 2px solid var(--border);
+  border-radius: 24px;
+  outline: none;
+  transition: border-color 0.2s;
+  margin-bottom: 0;
+}
+.chat-input-bar .chat-input:focus { border-color: var(--primary-light); }
+
+.chat-input-bar .btn-voice {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--bg);
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.chat-input-bar .btn-voice:active { background: var(--border); }
+
+.chat-input-bar .btn-send {
+  width: 72px; height: 48px;
+  border-radius: 24px;
+  border: none;
+  background: var(--primary);
+  color: #fff;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  font-family: 'Noto Sans KR', sans-serif;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s, transform 0.1s;
+}
+.chat-input-bar .btn-send:active { background: var(--primary-dark); transform: scale(0.95); }
+
+/* 로딩 점 애니메이션 */
+.typing-dots {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  padding: 4px 0;
+}
+.typing-dots span {
+  width: 8px; height: 8px;
+  background: var(--text-muted);
+  border-radius: 50%;
+  animation: dotBounce 1.2s infinite;
+}
+.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes dotBounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+  40%           { transform: translateY(-6px); opacity: 1; }
+}
+
+/* ── 15. 스피너 ── */
+.spinner {
+  border: 3px solid rgba(27,61,111,0.12);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border-left-color: var(--primary-light);
+  animation: spin 0.9s linear infinite;
+  margin: 24px auto 8px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading-msg { text-align: center; font-size: var(--font-size-sm); color: var(--text-sub); margin-bottom: 16px; }
+
+/* ── 16. 퇴직공제 결과 ── */
+.calc-result {
+  background: var(--success-light);
+  border: 1px solid #B2DFCC;
+  border-radius: var(--radius-md);
+  padding: 24px 20px;
+  text-align: center;
+  margin-top: 16px;
+}
+.calc-result .amount {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--success);
+  letter-spacing: -1px;
+}
+
+/* ── 17. 홈 메뉴 카드 ── */
+.home-menu-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 20px;
+}
+.home-menu-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 20px 14px;
+  text-align: center;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.15s, box-shadow 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.home-menu-card:active { transform: scale(0.96); box-shadow: none; }
+.home-menu-card .menu-icon {
+  width: 56px; height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+}
+.home-menu-card .menu-label {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+}
+.home-menu-card .menu-desc {
+  font-size: 12px;
+  color: var(--text-sub);
+  line-height: 1.4;
+}
+
+/* ── 18. 지도 ── */
+#map { width: 100%; height: 60vw; max-height: 360px; border-radius: var(--radius-md); }
+
+/* ── 19. 구분선 ── */
+.divider {
+  height: 1px;
+  background: var(--border-light);
+  margin: 16px 0;
+}
+
+/* ── 20. 빈 상태 ── */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-sub);
+}
+.empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; }
+.empty-state p { font-size: var(--font-size-sm); line-height: 1.6; }

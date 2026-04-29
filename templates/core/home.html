@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}홈{% endblock %}
+{% block header_title %}현장이음{% endblock %}
+
+{% block content %}
+
+<!-- 환영 배너 -->
+<div style="
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  border-radius: var(--radius-lg);
+  padding: 24px 20px;
+  margin-bottom: 20px;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+">
+  <div style="position: absolute; right: -20px; top: -20px; font-size: 100px; opacity: 0.08; line-height: 1;">🏗️</div>
+  <p style="font-size: 13px; font-weight: 500; opacity: 0.8; margin-bottom: 6px; letter-spacing: 0.5px;">건설 일용직 근로자를 위한</p>
+  <h1 style="font-size: 24px; font-weight: 900; letter-spacing: -0.5px; margin-bottom: 4px;">현장이음</h1>
+  <p style="font-size: 14px; opacity: 0.85; line-height: 1.5;">
+    일자리 안내부터 건강검진·퇴직공제까지<br>필요한 정보를 한 곳에서 확인하세요.
+  </p>
+</div>
+
+<!-- 메뉴 그리드 -->
+<p style="font-size: 13px; font-weight: 700; color: var(--text-sub); margin-bottom: 10px; letter-spacing: 0.3px;">서비스 안내</p>
+<div class="home-menu-grid">
+  <a href="{% url 'jobs:list' %}" class="home-menu-card">
+    <div class="menu-icon" style="background: #E0E9FF;">💼</div>
+    <div class="menu-label">취업지원<br>센터 찾기</div>
+    <div class="menu-desc">가까운 센터에서<br>일자리 안내</div>
+  </a>
+  <a href="{% url 'health:map' %}" class="home-menu-card">
+    <div class="menu-icon" style="background: #E6F5EC;">🏥</div>
+    <div class="menu-label">무료 건강검진<br>기관 찾기</div>
+    <div class="menu-desc">공제회 지정<br>검진기관 안내</div>
+  </a>
+  <a href="{% url 'pension:search' %}" class="home-menu-card">
+    <div class="menu-icon" style="background: #FFF3DC;">💰</div>
+    <div class="menu-label">퇴직공제<br>현장 확인</div>
+    <div class="menu-desc">내 현장 가입<br>여부 조회</div>
+  </a>
+  <a href="{% url 'chatbot:chat' %}" class="home-menu-card">
+    <div class="menu-icon" style="background: #F0E8FF;">💬</div>
+    <div class="menu-label">AI 상담사에게<br>물어보기</div>
+    <div class="menu-desc">24시간 언제든<br>무료 상담</div>
+  </a>
+</div>
+
+<!-- 안전 알림 영역 -->
+<div id="alertsContainer" style="margin-top: 24px;"></div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+async function loadAlerts() {
+    try {
+        const res = await fetch("/health/api/alerts/");
+        const data = await res.json();
+        
+        const container = document.getElementById("alertsContainer");
+        if (data.alerts && data.alerts.length > 0) {
+            let html = '<p style="font-size: 13px; font-weight: 700; color: var(--text-sub); margin-bottom: 10px; letter-spacing: 0.3px;">오늘의 안전 알림</p>';
+            data.alerts.forEach(alert => {
+                html += `
+                <div class="alert-card">
+                    <span class="type-badge">${alert.type}</span>
+                    <strong style="display: block; font-size: var(--font-size-base); margin-bottom: 4px; color: var(--text);">${alert.title}</strong>
+                    <p style="margin: 0; font-size: var(--font-size-sm); color: var(--text-sub); line-height: 1.55;">${alert.summary}</p>
+                </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+    } catch (e) {
+        console.error("안전 알림 로딩 실패", e);
+    }
+}
+
+window.onload = loadAlerts;
+</script>
+{% endblock %}
