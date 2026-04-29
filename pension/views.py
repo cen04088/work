@@ -1,5 +1,3 @@
-import requests
-from django.conf import settings
 from django.http import JsonResponse
 from django.views.generic import TemplateView
 
@@ -24,10 +22,11 @@ def search_sites_json(request):
             "id": site.id,
             "project": site.project_name,
             "company": site.company_name,
-            "period": site.address, # 공사기간 대신 주소 사용
+            "amount": site.total_amount,
+            "client": site.client_org,
+            "address": site.address,
             "enrolled": True,
         }
         for site in sites
     ]
     return JsonResponse({"results": results})
-

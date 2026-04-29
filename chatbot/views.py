@@ -2,8 +2,6 @@ import json
 from django.conf import settings
 from django.http import JsonResponse
 from django.views.generic import TemplateView
-from google import genai
-from google.genai import types
 
 SYSTEM_PROMPT = """
 당신은 '현장이음' 앱의 AI 상담사입니다.
@@ -27,6 +25,47 @@ SYSTEM_PROMPT = """
 class ChatView(TemplateView):
     template_name = 'chatbot/chat.html'
 
+def fallback_reply(user_message):
+    message = user_message.lower()
+
+    if "퇴직" in message or "공제" in message:
+        return (
+            "퇴직공제는 일한 날마다 쌓입니다.\n"
+            "1. 현장 가입 여부를 먼저 확인하세요.\n"
+            "2. 건설근로자공제회에 신청하세요.\n"
+            "3. 자세한 문의는 1588-0075입니다."
+        )
+
+    if "건강" in message or "검진" in message:
+        return (
+            "건강검진은 공제회 지원 대상이면 무료입니다.\n"
+            "1. 건강·안전 메뉴를 여세요.\n"
+            "2. 지역을 선택하세요.\n"
+            "3. 가까운 기관에 전화하세요."
+        )
+
+    if "일자리" in message or "취업" in message or "센터" in message:
+        return (
+            "일자리는 취업지원센터에서 안내받을 수 있습니다.\n"
+            "1. 일자리 메뉴를 누르세요.\n"
+            "2. 지역을 선택하세요.\n"
+            "3. 센터 전화번호로 문의하세요."
+        )
+
+    if "안전" in message or "사고" in message or "산재" in message:
+        return (
+            "현장에서는 추락과 낙하물을 조심하세요.\n"
+            "1. 안전모와 안전대를 확인하세요.\n"
+            "2. 작업 전 발판을 확인하세요.\n"
+            "3. 다치면 바로 관리자에게 알리세요."
+        )
+
+    return (
+        "현장이음은 건설근로자를 돕는 서비스입니다.\n"
+        "퇴직공제, 건강검진, 일자리, 안전을 물어보세요.\n"
+        "정확한 상담은 건설근로자공제회 1588-0075로 문의하세요."
+    )
+
 def chat_api(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST만 허용"}, status=405)
@@ -38,7 +77,13 @@ def chat_api(request):
         
         if not user_message:
             return JsonResponse({"error": "메시지를 입력해주세요", "status": "error"}, status=400)
-            
+
+        if not settings.GEMINI_API_KEY:
+            return JsonResponse({"reply": fallback_reply(user_message), "status": "ok"})
+
+        from google import genai
+        from google.genai import types
+
         client = genai.Client(api_key=settings.GEMINI_API_KEY)
         
         # history format for gemini: [{'role': 'user', 'parts': [{'text': '...'}]}, {'role': 'model', 'parts': [{'text': '...'}]}]
@@ -77,6 +122,6 @@ def chat_api(request):
     except Exception as e:
         print(f"Chatbot Error: {e}")
         return JsonResponse({
-            "reply": "죄송합니다. 잠시 후 다시 시도해주세요.\n📞 직접 문의: 건설근로자공제회 1588-0075",
-            "status": "error"
+            "reply": fallback_reply(user_message if 'user_message' in locals() else ""),
+            "status": "ok"
         })
