@@ -64,41 +64,4 @@
   </a>
 </div>
 
-<div class="source-box">
-  공공데이터포털과 건설근로자공제회 공개 데이터를 기반으로 안내합니다.
-</div>
-
-<!-- 안전 알림 영역 -->
-<div id="alertsContainer" style="margin-top: 24px;"></div>
-
-{% endblock %}
-
-{% block extra_js %}
-<script>
-async function loadAlerts() {
-    try {
-        const res = await fetch("/health/api/alerts/");
-        const data = await res.json();
-        
-        const container = document.getElementById("alertsContainer");
-        if (data.alerts && data.alerts.length > 0) {
-            let html = '<p style="font-size: 13px; font-weight: 700; color: var(--text-sub); margin-bottom: 10px; letter-spacing: 0.3px;">오늘의 안전 알림</p>';
-            data.alerts.forEach(alert => {
-                html += `
-                <div class="alert-card">
-                    <span class="type-badge">${alert.type}</span>
-                    <strong style="display: block; font-size: var(--font-size-base); margin-bottom: 4px; color: var(--text);">${alert.title}</strong>
-                    <p style="margin: 0; font-size: var(--font-size-sm); color: var(--text-sub); line-height: 1.55;">${alert.summary}</p>
-                </div>
-                `;
-            });
-            container.innerHTML = html;
-        }
-    } catch (e) {
-        console.error("안전 알림 로딩 실패", e);
-    }
-}
-
-window.onload = loadAlerts;
-</script>
 {% endblock %}
