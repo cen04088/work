@@ -27,9 +27,23 @@ def clinics_json(request):
     from .models import HealthClinic
     from django.db.models import Q
     
+    region_groups = {
+        "수도권": ["수도권", "서울", "경기", "인천"],
+        "강원권": ["강원권", "강원"],
+        "충청권": ["충남권", "충북권", "대전", "세종", "충남", "충북", "충청"],
+        "호남권": ["전남권", "전북권", "광주", "전남", "전북", "호남"],
+        "대구·경북권": ["경북권", "대구", "경북"],
+        "부산·울산·경남권": ["경남권", "부산", "울산", "경남"],
+        "제주권": ["제주권", "제주"],
+    }
+
     qs = HealthClinic.objects.all()
     if region:
-        qs = qs.filter(Q(address__icontains=region))
+        keywords = region_groups.get(region, [region])
+        query = Q()
+        for keyword in keywords:
+            query |= Q(region__icontains=keyword) | Q(address__icontains=keyword)
+        qs = qs.filter(query)
     else:
         # 지역 선택이 없을 때는 최대 50개 제한 (지오코딩 부하 방지)
         qs = qs[:50]

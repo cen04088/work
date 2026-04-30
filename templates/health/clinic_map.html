@@ -34,32 +34,22 @@
     </span>
   </div>
 
-  <p class="section-desc" style="margin-bottom: 8px;">지역을 선택하면 해당 지역의 검진기관 목록을 보여줍니다.</p>
+  <p class="section-desc" style="margin-bottom: 8px;">가까운 권역을 선택하면 검진기관 목록을 보여줍니다.</p>
   <select id="regionSelect" class="search-input" onchange="loadClinics()">
-    <option value="">지역을 선택해주세요</option>
-    <option value="서울">서울</option>
-    <option value="경기">경기</option>
-    <option value="인천">인천</option>
-    <option value="강원">강원</option>
-    <option value="대전">대전</option>
-    <option value="충남">충남</option>
-    <option value="충북">충북</option>
-    <option value="세종">세종</option>
-    <option value="광주">광주</option>
-    <option value="전남">전남</option>
-    <option value="전북">전북</option>
-    <option value="대구">대구</option>
-    <option value="경북">경북</option>
-    <option value="부산">부산</option>
-    <option value="울산">울산</option>
-    <option value="경남">경남</option>
-    <option value="제주">제주</option>
+    <option value="">권역을 선택해주세요</option>
+    <option value="수도권">수도권 (서울·경기·인천)</option>
+    <option value="강원권">강원권</option>
+    <option value="충청권">충청권 (대전·세종·충남·충북)</option>
+    <option value="호남권">호남권 (광주·전남·전북)</option>
+    <option value="대구·경북권">대구·경북권</option>
+    <option value="부산·울산·경남권">부산·울산·경남권</option>
+    <option value="제주권">제주권</option>
   </select>
 
   <div id="clinicsList" style="margin-top: 16px;">
     <div class="empty-state">
       <div class="empty-icon">+</div>
-      <p>지역을 선택하면<br>검진기관 목록이 표시됩니다.</p>
+      <p>권역을 선택하면<br>검진기관 목록이 표시됩니다.</p>
     </div>
   </div>
 </section>
@@ -83,7 +73,7 @@ async function loadClinics() {
         listContainer.innerHTML = `
           <div class="empty-state">
             <div class="empty-icon">+</div>
-            <p>지역을 선택하면<br>검진기관 목록이 표시됩니다.</p>
+            <p>권역을 선택하면<br>검진기관 목록이 표시됩니다.</p>
           </div>`;
         return;
     }
@@ -115,7 +105,7 @@ async function loadClinics() {
             listContainer.innerHTML = `
               <div class="empty-state">
                 <div class="empty-icon">-</div>
-                <p>해당 지역의 검진기관이 없습니다.<br>가까운 다른 지역을 선택해보세요.</p>
+                <p>해당 권역의 검진기관이 없습니다.<br>가까운 다른 권역을 선택해보세요.</p>
               </div>`;
         }
     } catch (e) {
