@@ -122,7 +122,7 @@ async function loadClinics() {
             let listHtml = `<p style="font-size:13px; font-weight:700; color:var(--text-sub); margin-bottom:10px;">${region} 검진기관 ${data.clinics.length}곳</p>`;
 
             data.clinics.forEach(c => {
-                const mapQuery = encodeURIComponent(c.address + " " + c.name);
+                const mapQuery = encodeURIComponent(c.name);
                 listHtml += `
                 <div class="job-card">
                   <div class="company" style="margin-bottom: 6px;">${c.name}</div>
