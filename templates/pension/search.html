@@ -14,6 +14,17 @@
   </ul>
 </div>
 
+<div class="data-freshness">
+  <strong>매일 12시 갱신</strong>
+  <span>
+    {% if public_data_synced_at %}
+      {{ public_data_synced_at|date:"Y.m.d H:i" }} 기준
+    {% else %}
+      가입현장 데이터 기준
+    {% endif %}
+  </span>
+</div>
+
 <!-- 검색 -->
 <p class="section-desc" style="margin-bottom: 8px;">일하고 계신 현장명 또는 시공사를 입력해보세요.</p>
 <div style="display: flex; gap: 8px;">
@@ -69,15 +80,15 @@ async function searchSites() {
         } else {
             resultsDiv.innerHTML = `
               <div class="empty-state">
-                <div class="empty-icon">🔍</div>
-                <p>검색 결과가 없습니다.<br>다른 검색어로 시도해보세요.</p>
+                <div class="empty-icon">-</div>
+                <p>가입현장을 찾지 못했습니다.<br>현장명 일부나 시공사명으로 다시 검색해보세요.</p>
               </div>`;
         }
     } catch (e) {
         resultsDiv.innerHTML = `
           <div class="empty-state">
-            <div class="empty-icon">⚠️</div>
-            <p style="color: var(--warning);">오류가 발생했습니다.<br>잠시 후 다시 시도해주세요.</p>
+            <div class="empty-icon">!</div>
+            <p style="color: var(--warning);">가입현장 정보를 불러오지 못했습니다.<br>잠시 후 다시 검색해주세요.</p>
           </div>`;
     }
 }

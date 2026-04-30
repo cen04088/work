@@ -25,6 +25,11 @@
     </ul>
   </div>
 
+  <div class="data-freshness">
+    <strong>실시간 API</strong>
+    <span>기상청 단기예보 기준</span>
+  </div>
+
   <div id="weatherList" style="margin-top: 12px;"></div>
 </section>
 
@@ -61,7 +66,7 @@ async function loadWeather() {
         });
         container.innerHTML = html;
     } catch (e) {
-        container.innerHTML = `<div class="empty-state compact"><p>${e.message}<br>API 설정을 확인해주세요.</p></div>`;
+        container.innerHTML = `<div class="empty-state compact"><p style="color: var(--warning);">기상 정보를 불러오지 못했습니다.<br>잠시 후 다시 갱신해주세요.</p></div>`;
     }
 }
 

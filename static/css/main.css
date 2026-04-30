@@ -198,8 +198,36 @@ body.large-text-mode .section-desc,
 body.large-text-mode .source-box,
 body.large-text-mode .menu-desc,
 body.large-text-mode .weather-notice p,
-body.large-text-mode .nearby-card p {
+body.large-text-mode .nearby-card p,
+body.large-text-mode .today-check-card p,
+body.large-text-mode .today-check-head span,
+body.large-text-mode .home-sync-note,
+body.large-text-mode .home-scenario p,
+body.large-text-mode .data-freshness,
+body.large-text-mode .data-freshness strong {
   font-size: 18px;
+}
+
+body.large-text-mode .today-check-card strong,
+body.large-text-mode .home-ai-link strong,
+body.large-text-mode .home-scenario strong {
+  font-size: 21px;
+}
+
+body.large-text-mode .daily-checklist label {
+  font-size: 20px;
+  min-height: 56px;
+}
+
+body.large-text-mode .daily-checklist input {
+  width: 28px;
+  height: 28px;
+}
+
+body.large-text-mode .today-check-icon {
+  width: 54px;
+  height: 54px;
+  font-size: 20px;
 }
 
 /* ── 5. 메인 콘텐츠 ── */
@@ -528,6 +556,32 @@ main { padding: 16px; }
   font-size: 18px;
   font-weight: 900;
   letter-spacing: 0;
+}
+
+.data-freshness {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: #FFFFFF;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  color: var(--text-sub);
+  font-size: 12px;
+  line-height: 1.35;
+  padding: 10px 12px;
+  margin: -4px 0 14px;
+}
+
+.data-freshness strong {
+  color: var(--success);
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.data-freshness span {
+  text-align: right;
 }
 
 .tool-section {
@@ -931,6 +985,31 @@ main { padding: 16px; }
   background: var(--warning);
 }
 
+.home-scenario {
+  background: #FFFFFF;
+  border: 1px solid #D6E2F5;
+  border-left: 4px solid var(--accent);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.home-scenario strong {
+  display: block;
+  color: var(--text);
+  font-size: 16px;
+  line-height: 1.35;
+  margin-bottom: 4px;
+}
+
+.home-scenario p {
+  color: var(--text-sub);
+  font-size: 13px;
+  line-height: 1.55;
+  margin: 0;
+}
+
 .data-summary div {
   background: #FFFFFF;
   border: 1px solid var(--border-light);
@@ -1121,6 +1200,30 @@ main { padding: 16px; }
   40%           { transform: translateY(-6px); opacity: 1; }
 }
 
+.quick-question-row {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.quick-question-row button {
+  border: none;
+  border-radius: 999px;
+  background: #E0E9FF;
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 800;
+  font-family: 'Noto Sans KR', sans-serif;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+
+body.large-text-mode .quick-question-row button {
+  font-size: 17px;
+  padding: 10px 12px;
+}
+
 /* ── 15. 스피너 ── */
 .spinner {
   border: 3px solid rgba(27,61,111,0.12);
@@ -1261,6 +1364,177 @@ main { padding: 16px; }
   font-size: 13px;
   line-height: 1.35;
   margin-top: 3px;
+}
+
+.today-check {
+  margin-top: 18px;
+}
+
+.today-check-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 10px;
+}
+
+.today-check-head strong,
+.today-check-head span {
+  display: block;
+}
+
+.today-check-head strong {
+  color: var(--text);
+  font-size: 17px;
+  line-height: 1.35;
+}
+
+.today-check-head span {
+  color: var(--text-sub);
+  font-size: 13px;
+  line-height: 1.35;
+  margin-top: 2px;
+}
+
+.today-check-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.today-check-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #FFFFFF;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  text-decoration: none;
+  box-shadow: var(--shadow-sm);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.today-check-card:active {
+  transform: scale(0.98);
+}
+
+.today-check-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 17px;
+  font-weight: 900;
+}
+
+.today-check-icon.weather {
+  background: var(--accent-light);
+  color: var(--accent-dark);
+}
+
+.today-check-icon.pension {
+  background: #E0E9FF;
+  color: var(--primary);
+}
+
+.today-check-icon.jobs {
+  background: var(--success-light);
+  color: var(--success);
+}
+
+.today-check-icon.health {
+  background: #F0F4FC;
+  color: var(--primary-light);
+}
+
+.today-check-card strong {
+  display: block;
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+.today-check-card p {
+  color: var(--text-sub);
+  font-size: 12px;
+  line-height: 1.4;
+  margin: 3px 0 0;
+}
+
+.home-ai-link {
+  display: block;
+  background: #FFFFFF;
+  border: 1px solid #D6E2F5;
+  border-left: 4px solid var(--primary-light);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin-top: 16px;
+  text-decoration: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.home-ai-link span,
+.home-ai-link strong {
+  display: block;
+}
+
+.home-ai-link span {
+  color: var(--primary-light);
+  font-size: 12px;
+  font-weight: 900;
+  margin-bottom: 3px;
+}
+
+.home-ai-link strong {
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.home-sync-note {
+  color: var(--text-sub);
+  font-size: 12px;
+  line-height: 1.4;
+  text-align: center;
+  margin-top: 14px;
+}
+
+.daily-checklist {
+  background: #FFFFFF;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  margin-top: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.daily-checklist label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  border-top: 1px solid var(--border-light);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.daily-checklist label:first-of-type {
+  border-top: none;
+}
+
+.daily-checklist input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--success);
+  flex-shrink: 0;
+}
+
+.daily-checklist input:checked + span {
+  color: var(--success);
 }
 
 .emergency-page {

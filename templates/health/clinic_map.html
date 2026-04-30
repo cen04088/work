@@ -23,6 +23,17 @@
     </a>
   </div>
 
+  <div class="data-freshness">
+    <strong>매일 12시 갱신</strong>
+    <span>
+      {% if public_data_synced_at %}
+        {{ public_data_synced_at|date:"Y.m.d H:i" }} 기준
+      {% else %}
+        검진기관 데이터 기준
+      {% endif %}
+    </span>
+  </div>
+
   <p class="section-desc" style="margin-bottom: 8px;">지역을 선택하면 해당 지역의 검진기관 목록을 보여줍니다.</p>
   <select id="regionSelect" class="search-input" onchange="loadClinics()">
     <option value="">지역을 선택해주세요</option>
@@ -97,14 +108,14 @@ async function loadClinics() {
             listContainer.innerHTML = `
               <div class="empty-state">
                 <div class="empty-icon">-</div>
-                <p>해당 지역에 등록된 검진기관이 없습니다.</p>
+                <p>해당 지역의 검진기관이 없습니다.<br>가까운 다른 지역을 선택해보세요.</p>
               </div>`;
         }
     } catch (e) {
         listContainer.innerHTML = `
           <div class="empty-state">
             <div class="empty-icon">!</div>
-            <p style="color: var(--warning);">오류가 발생했습니다.<br>잠시 후 다시 시도해주세요.</p>
+            <p style="color: var(--warning);">검진기관을 불러오지 못했습니다.<br>잠시 후 다시 시도해주세요.</p>
           </div>`;
     }
 }

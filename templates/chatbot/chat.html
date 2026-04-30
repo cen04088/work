@@ -37,6 +37,11 @@
       💬 "취업지원센터 연락처 알려줘"<br>
       💬 "건강검진 신청 방법이 뭐예요?"
     </div>
+    <div class="quick-question-row">
+      <button type="button" onclick="sendQuickQuestion('내 현장이 퇴직공제 가입현장인지 확인하려면?')">퇴직공제</button>
+      <button type="button" onclick="sendQuickQuestion('가까운 무료 건강검진기관은 어디서 찾나요?')">건강검진</button>
+      <button type="button" onclick="sendQuickQuestion('취업지원 지사는 어떻게 이용하나요?')">취업지원</button>
+    </div>
   </div>
 </div>
 
@@ -70,6 +75,12 @@ function send() {
         sendMessage(text);
         input.value = '';
     }
+}
+
+function sendQuickQuestion(text) {
+    const input = document.getElementById('chat-input');
+    if (input) input.value = text;
+    send();
 }
 </script>
 {% endblock %}

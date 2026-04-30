@@ -41,30 +41,10 @@
 
 <div id="weatherNotice" class="weather-notice" style="display:none;"></div>
 
-<!-- 메뉴 그리드 -->
-<p style="font-size: 13px; font-weight: 700; color: var(--text-sub); margin-bottom: 10px; letter-spacing: 0.3px;">서비스 안내</p>
-<div class="home-menu-grid">
-  <a href="{% url 'jobs:list' %}" class="home-menu-card">
-    <div class="menu-icon" style="background: #E0E9FF; color: var(--primary);">💼</div>
-    <div class="menu-label">취업지원<br>센터 찾기</div>
-    <div class="menu-desc">가까운 센터에서<br>일자리 안내</div>
-  </a>
-  <a href="{% url 'health:map' %}" class="home-menu-card">
-    <div class="menu-icon" style="background: var(--success-light); color: var(--success);">🏥</div>
-    <div class="menu-label">무료 건강검진<br>기관 찾기</div>
-    <div class="menu-desc">공제회 지정<br>검진기관 안내</div>
-  </a>
-  <a href="{% url 'pension:search' %}" class="home-menu-card">
-    <div class="menu-icon" style="background: var(--accent-light); color: var(--accent-dark);">💰</div>
-    <div class="menu-label">퇴직공제<br>현장 확인</div>
-    <div class="menu-desc">내 현장 가입<br>여부 조회</div>
-  </a>
-  <a href="{% url 'chatbot:chat' %}" class="home-menu-card">
-    <div class="menu-icon" style="background: var(--border-light); color: var(--primary-light);">💬</div>
-    <div class="menu-label">AI 상담사에게<br>물어보기</div>
-    <div class="menu-desc">24시간 언제든<br>무료 상담</div>
-  </a>
-</div>
+<section class="home-scenario">
+  <strong>처음 가는 현장이라면</strong>
+  <p>출근 전 날씨를 보고, 현장 가입 여부를 확인한 뒤, 위급할 때 가까운 응급실까지 바로 찾을 수 있습니다.</p>
+</section>
 
 <a href="{% url 'health:emergency' %}" class="home-emergency-link" aria-label="긴급 도움">
   <span class="home-emergency-icon">!</span>
@@ -73,6 +53,78 @@
     <small>가까운 응급실 찾기</small>
   </span>
 </a>
+
+<section class="today-check">
+  <div class="today-check-head">
+    <div>
+      <strong>오늘의 현장 체크</strong>
+      <span>출근 전 필요한 것만 빠르게 확인하세요</span>
+    </div>
+  </div>
+
+  <div class="today-check-list">
+    <a href="{% url 'health:weather' %}" class="today-check-card">
+      <span class="today-check-icon weather">☀</span>
+      <div>
+        <strong>작업 날씨 확인</strong>
+        <p>폭염·강풍·비 예보를 먼저 확인</p>
+      </div>
+    </a>
+    <a href="{% url 'pension:search' %}" class="today-check-card">
+      <span class="today-check-icon pension">₩</span>
+      <div>
+        <strong>퇴직공제 가입현장 조회</strong>
+        <p>현장명이나 시공사로 바로 검색</p>
+      </div>
+    </a>
+    <a href="{% url 'jobs:list' %}" class="today-check-card">
+      <span class="today-check-icon jobs">일</span>
+      <div>
+        <strong>취업지원 지사 확인</strong>
+        <p>대표번호와 가까운 지사 안내</p>
+      </div>
+    </a>
+    <a href="{% url 'health:map' %}" class="today-check-card">
+      <span class="today-check-icon health">검</span>
+      <div>
+        <strong>무료 건강검진기관 찾기</strong>
+        <p>지역별 검진기관과 지도 연결</p>
+      </div>
+    </a>
+  </div>
+</section>
+
+<section class="daily-checklist">
+  <div class="today-check-head">
+    <div>
+      <strong>출근 전 체크리스트</strong>
+      <span>오늘 현장에 가기 전 확인하세요</span>
+    </div>
+  </div>
+  <label>
+    <input type="checkbox" data-daily-check="weather">
+    <span>날씨와 작업주의 확인</span>
+  </label>
+  <label>
+    <input type="checkbox" data-daily-check="pension">
+    <span>현장 퇴직공제 가입 여부 확인</span>
+  </label>
+  <label>
+    <input type="checkbox" data-daily-check="safety">
+    <span>안전모·안전화·물 챙기기</span>
+  </label>
+</section>
+
+<a href="{% url 'chatbot:chat' %}" class="home-ai-link">
+  <span>AI 상담</span>
+  <strong>퇴직공제·검진·취업지원이 헷갈리면 물어보세요</strong>
+</a>
+
+{% if public_data_synced_at %}
+<p class="home-sync-note">공공데이터 {{ public_data_synced_at|date:"Y.m.d H:i" }} 기준</p>
+{% else %}
+<p class="home-sync-note">공공데이터 기반 안내</p>
+{% endif %}
 
 {% endblock %}
 
@@ -109,5 +161,20 @@ async function loadWeatherNotice() {
 }
 
 window.addEventListener("load", loadWeatherNotice);
+
+function initDailyChecklist() {
+    const today = new Date().toISOString().slice(0, 10);
+    const key = `dailyChecklist:${today}`;
+    const saved = JSON.parse(localStorage.getItem(key) || "{}");
+    document.querySelectorAll("[data-daily-check]").forEach(input => {
+        input.checked = Boolean(saved[input.dataset.dailyCheck]);
+        input.addEventListener("change", () => {
+            saved[input.dataset.dailyCheck] = input.checked;
+            localStorage.setItem(key, JSON.stringify(saved));
+        });
+    });
+}
+
+window.addEventListener("load", initDailyChecklist);
 </script>
 {% endblock %}

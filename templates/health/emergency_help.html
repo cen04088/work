@@ -98,7 +98,7 @@ async function loadNearbyEmergency() {
         await loadEmergencyRooms(query);
     } catch (e) {
         label.textContent = '위치 권한이 필요합니다.';
-        document.getElementById("emergencyRoomsList").innerHTML = `<div class="nearby-state error">${e.message}<br>브라우저 위치 권한을 허용해주세요.</div>`;
+        document.getElementById("emergencyRoomsList").innerHTML = `<div class="nearby-state error">현재 위치를 확인하지 못했습니다.<br>브라우저 위치 권한을 허용한 뒤 다시 시도해주세요.</div>`;
     }
 }
 
@@ -112,13 +112,13 @@ async function loadEmergencyRooms(query) {
         if (!res.ok) throw new Error(data.error || '응급실 정보를 불러오지 못했습니다.');
         renderNearbyItems(container, data.results, '응급실');
     } catch (e) {
-        container.innerHTML = `<div class="nearby-state error">${e.message}</div>`;
+        container.innerHTML = `<div class="nearby-state error">응급실 정보를 불러오지 못했습니다.<br>잠시 후 다시 시도해주세요.</div>`;
     }
 }
 
 function renderNearbyItems(container, items, label) {
     if (!items || items.length === 0) {
-        container.innerHTML = `<div class="nearby-state">주변 ${label} 정보가 없습니다.</div>`;
+        container.innerHTML = `<div class="nearby-state">가까운 ${label} 정보를 찾지 못했습니다.<br>잠시 후 다시 시도해주세요.</div>`;
         return;
     }
 
