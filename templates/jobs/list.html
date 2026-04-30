@@ -11,13 +11,21 @@
     건설근로자공제회 공개 데이터 기준의 <span style="color:var(--success); font-weight:700;">무료</span> 취업지원 안내입니다.
   </p>
   <p style="font-size: var(--font-size-sm); color: var(--text); line-height: 1.65;">
-    가까운 지사, 운영기관, 운영시간, 주소와 전화번호를 확인할 수 있습니다.
+    가까운 지사, 운영기관, 운영시간, 주소와 대표번호를 확인할 수 있습니다.
   </p>
 </div>
 
 <div class="source-box" style="margin-bottom: 16px;">
   활용 데이터: 건설근로자공제회 취업정보 2025-07-22 수정본 및 건설기능인력 훈련기관 정보
 </div>
+
+<a href="tel:1666-1829" class="job-main-call">
+  <span>
+    <strong>대표 상담번호</strong>
+    <small>전국 취업지원 지사 공통</small>
+  </span>
+  <em>1666-1829</em>
+</a>
 
 <!-- 지역 필터 -->
 <p class="section-desc" style="margin-bottom: 8px;">지역을 선택하여 가까운 취업지원 지사를 찾아보세요.</p>
@@ -110,9 +118,6 @@ async function loadJobs() {
                     <span class="badge badge-primary" style="font-size: 13px;">${center.region}</span>
                     ${center.source_updated_at ? `<span class="badge badge-success" style="font-size: 13px;">${center.source_updated_at} 기준</span>` : ''}
                   </div>
-                  <a href="tel:${center.phone}" class="call-btn">
-                    전화 문의 ${center.phone}
-                  </a>
                 </div>
                 `;
             });
