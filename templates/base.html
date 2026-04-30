@@ -28,6 +28,9 @@
       </svg>
     </a>
     <span class="header-title">{% block header_title %}현장이음{% endblock %}</span>
+    <button type="button" id="largeTextToggle" class="large-text-toggle" onclick="toggleLargeText()" aria-pressed="false">
+      큰글씨
+    </button>
   </header>
   
   <!-- 메인 콘텐츠 영역 -->
@@ -55,6 +58,24 @@
     </a>
   </nav>
 
+  <script>
+    function applyLargeText(enabled) {
+      document.body.classList.toggle('large-text-mode', enabled);
+      const button = document.getElementById('largeTextToggle');
+      if (button) {
+        button.setAttribute('aria-pressed', enabled ? 'true' : 'false');
+        button.textContent = enabled ? '기본글씨' : '큰글씨';
+      }
+    }
+
+    function toggleLargeText() {
+      const enabled = !document.body.classList.contains('large-text-mode');
+      localStorage.setItem('largeTextMode', enabled ? '1' : '0');
+      applyLargeText(enabled);
+    }
+
+    applyLargeText(localStorage.getItem('largeTextMode') === '1');
+  </script>
   {% block extra_js %}{% endblock %}
 </div>
 </body>

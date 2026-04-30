@@ -117,6 +117,65 @@ header .header-title {
   letter-spacing: -0.3px;
 }
 
+.large-text-toggle {
+  position: absolute;
+  right: 10px;
+  min-width: 58px;
+  height: 34px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.16);
+  color: #FFFFFF;
+  font-size: 12px;
+  font-weight: 800;
+  font-family: 'Noto Sans KR', sans-serif;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.large-text-toggle[aria-pressed="true"] {
+  background: #FFFFFF;
+  color: var(--primary);
+}
+
+body.large-text-mode {
+  --font-size-xs: 15px;
+  --font-size-sm: 18px;
+  --font-size-base: 20px;
+  --font-size-lg: 23px;
+  --font-size-xl: 27px;
+  --font-size-xxl: 31px;
+}
+
+body.large-text-mode .header-title {
+  font-size: 18px;
+  max-width: 210px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.large-text-mode .bottom-nav {
+  height: 78px;
+}
+
+body.large-text-mode #mobile-wrapper {
+  padding-bottom: 86px;
+}
+
+body.large-text-mode .bottom-nav a span:last-child {
+  font-size: 12px;
+}
+
+body.large-text-mode .search-input,
+body.large-text-mode .btn-primary,
+body.large-text-mode .btn-accent,
+body.large-text-mode .form-action-btn,
+body.large-text-mode .call-btn,
+body.large-text-mode .emergency-location-btn {
+  min-height: 58px;
+}
+
 /* ── 5. 메인 콘텐츠 ── */
 main { padding: 16px; }
 
