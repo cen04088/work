@@ -7,19 +7,6 @@
 {% block content %}
 
 <section class="tool-section" style="margin-bottom: 24px;">
-  <div class="tool-section-head" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-    <div>
-      <h2 style="display: flex; align-items: center; gap: 6px; margin: 0; font-size: 18px;">기상 작업주의</h2>
-      <span style="font-size: 13px; color: var(--text-sub); margin-top: 4px; display: block;">서울 기준 단기예보</span>
-    </div>
-    <button onclick="loadWeather()" class="utility-action-btn">
-      갱신
-    </button>
-  </div>
-  <div id="weatherList" style="margin-top: 8px;"></div>
-</section>
-
-<section class="tool-section" style="margin-bottom: 24px;">
   <div class="tool-section-head">
     <h2>무료 건강검진 안내</h2>
     <span>공제회 지원</span>
@@ -70,35 +57,6 @@
 
 {% block extra_js %}
 <script>
-async function loadWeather() {
-    const container = document.getElementById("weatherList");
-    container.innerHTML = '<div class="spinner"></div><div class="loading-msg">기상청 예보를 확인하고 있습니다...</div>';
-
-    try {
-        const res = await fetch('/health/api/weather/');
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || '기상 정보를 불러오지 못했습니다.');
-
-        const risky = data.hours.filter(h => h.warnings && h.warnings.length > 0);
-        const hours = risky.length ? risky : data.hours.slice(0, 3);
-        let html = `<p class="mini-caption">기준 시각 ${data.base_time}</p>`;
-        hours.forEach(h => {
-            const warnings = h.warnings && h.warnings.length
-              ? h.warnings.map(w => `<div class="warning-line">${w}</div>`).join('')
-              : '<div class="ok-line">현재 작업 기상 위험이 낮습니다.</div>';
-            html += `
-              <div class="mini-card">
-                <strong>${h.time}</strong>
-                <p>기온 ${h.temp ?? '-'}℃ · 풍속 ${h.wind ?? '-'}m/s · 강수 ${h.rain || '-'}</p>
-                ${warnings}
-              </div>`;
-        });
-        container.innerHTML = html;
-    } catch (e) {
-        container.innerHTML = `<div class="empty-state compact"><p>${e.message}<br>API 설정을 확인해주세요.</p></div>`;
-    }
-}
-
 async function loadClinics() {
     const region = document.getElementById("regionSelect").value;
     const listContainer = document.getElementById("clinicsList");
@@ -150,7 +108,5 @@ async function loadClinics() {
           </div>`;
     }
 }
-
-window.addEventListener("load", loadWeather);
 </script>
 {% endblock %}

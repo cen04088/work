@@ -100,7 +100,7 @@ async function loadWeatherNotice() {
             <strong>${first.time} 작업주의</strong>
             <p>${message}</p>
           </div>
-          <a href="{% url 'health:map' %}" class="notice-action-btn">자세히</a>
+          <a href="{% url 'health:weather' %}" class="notice-action-btn">자세히</a>
         `;
         box.style.display = "flex";
     } catch (e) {

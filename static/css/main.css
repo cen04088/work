@@ -532,6 +532,36 @@ main { padding: 16px; }
   margin-top: 4px;
 }
 
+.weather-page-section {
+  margin-bottom: 24px;
+}
+
+.weather-info-box {
+  margin-bottom: 14px;
+}
+
+.weather-hour-card {
+  background: #FFFFFF;
+}
+
+.weather-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.weather-metrics span {
+  background: #F3F6FB;
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.3;
+  padding: 9px 6px;
+  text-align: center;
+}
+
 .map-link-btn {
   flex: 1;
   height: 42px;
