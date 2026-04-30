@@ -14,10 +14,6 @@
   </ul>
 </div>
 
-<div class="source-box" style="margin-bottom: 16px;">
-  활용 데이터: 건설근로자공제회 퇴직공제 가입사업장 정보
-</div>
-
 <!-- 검색 -->
 <p class="section-desc" style="margin-bottom: 8px;">일하고 계신 현장명 또는 시공사를 입력해보세요.</p>
 <div style="display: flex; gap: 8px;">
@@ -60,7 +56,6 @@ async function searchSites() {
                   <div class="company">${site.project}</div>
                   <div class="meta" style="margin-top: 6px;">🏢 시공사: ${site.company}</div>
                   ${site.client ? `<div class="meta">🏛️ 수요기관: ${site.client}</div>` : ''}
-                  ${site.amount ? `<div class="meta">💵 총공사금액: ${site.amount}</div>` : ''}
                   <div class="meta">📍 소재지: ${site.address || '주소 정보 없음'}</div>
                   <div style="margin-top: 14px;">
                     <span class="badge badge-success" style="font-size: 14px; padding: 6px 14px;">
