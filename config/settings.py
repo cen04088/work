@@ -136,6 +136,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # API Keys
 CWMA_API_KEY = config('CWMA_API_KEY', default='')
 KOSHA_API_KEY = config('KOSHA_API_KEY', default='')
+PUBLIC_DATA_API_KEY = config('PUBLIC_DATA_API_KEY', default=KOSHA_API_KEY)
+KMA_API_KEY = config('KMA_API_KEY', default=PUBLIC_DATA_API_KEY)
+NEMC_API_KEY = config('NEMC_API_KEY', default=PUBLIC_DATA_API_KEY)
 GEMINI_API_KEY = config('GEMINI_API_KEY', default='')
 KAKAO_JS_KEY = config('KAKAO_JS_KEY', default='')
 

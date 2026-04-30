@@ -1,7 +1,9 @@
-import requests
-from django.conf import settings
+import csv
+from datetime import date
+from pathlib import Path
 from django.http import JsonResponse
 from django.views.generic import TemplateView
+from django.conf import settings
 
 class JobListView(TemplateView):
     template_name = 'jobs/list.html'
@@ -53,3 +55,36 @@ def get_centers_json(request):
         })
     return JsonResponse({"centers": centers})
 
+
+def get_training_json(request):
+    """건설근로자공제회 건설기능인력 훈련기관 CSV 기반 조회."""
+    region = request.GET.get("region", "").strip()
+    today = date.today().isoformat()
+    csv_path = Path(settings.BASE_DIR) / "data" / "건설근로자공제회_건설기능인력 훈련기관 정보_20250414.csv"
+
+    trainings = []
+    try:
+        with csv_path.open("r", encoding="cp949", newline="") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                address = row.get("훈련기관 주소", "")
+                start_date = row.get("개시일", "")
+                if region and region not in address:
+                    continue
+                if start_date and start_date < today:
+                    continue
+                trainings.append({
+                    "name": row.get("훈련기관명", ""),
+                    "course": row.get("훈련직종", ""),
+                    "type": row.get("훈련구분", ""),
+                    "start": start_date,
+                    "end": row.get("종료일", ""),
+                    "capacity": row.get("인원", ""),
+                    "address": address,
+                    "phone": row.get("훈련기관 전화번호", ""),
+                })
+    except FileNotFoundError:
+        return JsonResponse({"trainings": [], "error": "훈련기관 CSV 파일을 찾을 수 없습니다."}, status=404)
+
+    trainings.sort(key=lambda item: item["start"] or "9999-99-99")
+    return JsonResponse({"trainings": trainings[:10]})

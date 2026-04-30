@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}긴급 도움{% endblock %}
+{% block header_title %}긴급 도움{% endblock %}
+
+{% block content %}
+
+<section class="emergency-page">
+  <div class="emergency-page-hero">
+    <div class="emergency-page-icon">!</div>
+    <div>
+      <h1>가장 가까운 도움 3곳</h1>
+      <p id="emergencyLocationLabel">현재 위치를 확인하고 있습니다.</p>
+    </div>
+  </div>
+
+  <button class="emergency-location-btn" onclick="loadNearbyEmergency()">
+    내 위치 기준으로 다시 찾기
+  </button>
+
+  <div class="emergency-result-section">
+    <div class="emergency-list-head">
+      <strong>응급실</strong>
+      <span>거리순 3곳</span>
+    </div>
+    <div id="emergencyRoomsList" class="nearby-list"></div>
+  </div>
+
+  <div class="emergency-result-section">
+    <div class="emergency-list-head">
+      <strong>AED</strong>
+      <span>거리순 3곳</span>
+    </div>
+    <div id="aedsList" class="nearby-list"></div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function guessStage1ByCoords(lat, lon) {
+    if (lat >= 37.1 && lat <= 37.8 && lon >= 126.7 && lon <= 127.2) return '서울특별시';
+    if (lat >= 37.0 && lat <= 38.3 && lon >= 126.6 && lon <= 127.9) return '경기도';
+    if (lat >= 37.2 && lat <= 37.8 && lon >= 126.3 && lon <= 126.9) return '인천광역시';
+    if (lat >= 35.0 && lat <= 35.4 && lon >= 128.8 && lon <= 129.3) return '부산광역시';
+    if (lat >= 35.7 && lat <= 36.0 && lon >= 128.4 && lon <= 128.8) return '대구광역시';
+    if (lat >= 35.0 && lat <= 35.3 && lon >= 126.7 && lon <= 127.0) return '광주광역시';
+    if (lat >= 36.2 && lat <= 36.5 && lon >= 127.2 && lon <= 127.6) return '대전광역시';
+    if (lat >= 35.4 && lat <= 35.7 && lon >= 129.1 && lon <= 129.5) return '울산광역시';
+    return '서울특별시';
+}
+
+function setEmergencyLoading(message) {
+    document.getElementById("emergencyRoomsList").innerHTML = `<div class="nearby-state">${message}</div>`;
+    document.getElementById("aedsList").innerHTML = `<div class="nearby-state">${message}</div>`;
+}
+
+function getCurrentPosition() {
+    return new Promise((resolve, reject) => {
+        if (!navigator.geolocation) {
+            reject(new Error('이 기기에서는 위치 기능을 사용할 수 없습니다.'));
+            return;
+        }
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+            enableHighAccuracy: true,
+            timeout: 8000,
+            maximumAge: 60000,
+        });
+    });
+}
+
+function resolveRegionByKakao(lat, lon) {
+    return new Promise((resolve) => {
+        if (!window.kakao || !kakao.maps || !kakao.maps.services) {
+            resolve({ stage1: guessStage1ByCoords(lat, lon), stage2: '' });
+            return;
+        }
+        const geocoder = new kakao.maps.services.Geocoder();
+        geocoder.coord2RegionCode(lon, lat, (result, status) => {
+            if (status !== kakao.maps.services.Status.OK || !result.length) {
+                resolve({ stage1: guessStage1ByCoords(lat, lon), stage2: '' });
+                return;
+            }
+            const region = result.find(r => r.region_type === 'B') || result[0];
+            resolve({
+                stage1: region.region_1depth_name,
+                stage2: region.region_2depth_name,
+            });
+        });
+    });
+}
+
+async function loadNearbyEmergency() {
+    setEmergencyLoading('현재 위치 기준으로 가까운 곳을 찾고 있습니다.');
+    const label = document.getElementById("emergencyLocationLabel");
+
+    try {
+        const pos = await getCurrentPosition();
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        const region = await resolveRegionByKakao(lat, lon);
+        label.textContent = `${region.stage1}${region.stage2 ? ' ' + region.stage2 : ''} 기준`;
+
+        const query = `stage1=${encodeURIComponent(region.stage1)}&stage2=${encodeURIComponent(region.stage2)}&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}`;
+        await Promise.all([
+            loadEmergencyRooms(query),
+            loadAeds(query),
+        ]);
+    } catch (e) {
+        label.textContent = '위치 권한이 필요합니다.';
+        document.getElementById("emergencyRoomsList").innerHTML = `<div class="nearby-state error">${e.message}<br>브라우저 위치 권한을 허용해주세요.</div>`;
+        document.getElementById("aedsList").innerHTML = `<div class="nearby-state error">위치 확인 후 AED를 조회합니다.</div>`;
+    }
+}
+
+async function loadEmergencyRooms(query) {
+    const container = document.getElementById("emergencyRoomsList");
+    container.innerHTML = '<div class="nearby-state">응급실 정보를 확인하고 있습니다.</div>';
+
+    try {
+        const res = await fetch(`/health/api/emergency-rooms/?${query}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || '응급실 정보를 불러오지 못했습니다.');
+        renderNearbyItems(container, data.results, '응급실');
+    } catch (e) {
+        container.innerHTML = `<div class="nearby-state error">${e.message}</div>`;
+    }
+}
+
+async function loadAeds(query) {
+    const container = document.getElementById("aedsList");
+    container.innerHTML = '<div class="nearby-state">AED 위치를 확인하고 있습니다.</div>';
+
+    try {
+        const res = await fetch(`/health/api/aeds/?${query}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'AED 정보를 불러오지 못했습니다.');
+        renderNearbyItems(container, data.results, 'AED');
+    } catch (e) {
+        container.innerHTML = `<div class="nearby-state error">${e.message}</div>`;
+    }
+}
+
+function renderNearbyItems(container, items, label) {
+    if (!items || items.length === 0) {
+        container.innerHTML = `<div class="nearby-state">주변 ${label} 정보가 없습니다.</div>`;
+        return;
+    }
+
+    let html = '';
+    items.slice(0, 3).forEach((item, index) => {
+        const query = encodeURIComponent(`${item.address || ''} ${item.name || ''}`);
+        const distance = item.distance_km !== null && item.distance_km !== undefined ? `${item.distance_km}km` : '거리 확인 중';
+        html += `
+          <div class="nearby-card emergency-result-card">
+            <div class="nearby-rank">${index + 1}</div>
+            <div class="nearby-body">
+              <div class="nearby-title-row">
+                <strong>${item.name}</strong>
+                <span>${distance}</span>
+              </div>
+              ${item.place ? `<p>${item.place}</p>` : ''}
+              ${item.address ? `<p>${item.address}</p>` : ''}
+              ${item.bed ? `<div class="nearby-chip">가용 병상 ${item.bed}</div>` : ''}
+              <div class="nearby-actions">
+                ${item.phone ? `<a class="nearby-call" href="tel:${item.phone}">전화</a>` : ''}
+                <a class="nearby-map" href="https://map.kakao.com/link/search/${query}" target="_blank">지도</a>
+              </div>
+            </div>
+          </div>`;
+    });
+    container.innerHTML = html;
+}
+
+window.addEventListener("load", loadNearbyEmergency);
+</script>
+{% endblock %}

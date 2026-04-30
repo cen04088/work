@@ -39,29 +39,75 @@
   </div>
 </div>
 
+<div id="weatherNotice" class="weather-notice" style="display:none;"></div>
+
 <!-- 메뉴 그리드 -->
 <p style="font-size: 13px; font-weight: 700; color: var(--text-sub); margin-bottom: 10px; letter-spacing: 0.3px;">서비스 안내</p>
 <div class="home-menu-grid">
   <a href="{% url 'jobs:list' %}" class="home-menu-card">
-    <div class="menu-icon" style="background: #E0E9FF;">💼</div>
+    <div class="menu-icon" style="background: #E0E9FF; color: var(--primary);">💼</div>
     <div class="menu-label">취업지원<br>센터 찾기</div>
     <div class="menu-desc">가까운 센터에서<br>일자리 안내</div>
   </a>
   <a href="{% url 'health:map' %}" class="home-menu-card">
-    <div class="menu-icon" style="background: #E6F5EC;">🏥</div>
+    <div class="menu-icon" style="background: var(--success-light); color: var(--success);">🏥</div>
     <div class="menu-label">무료 건강검진<br>기관 찾기</div>
     <div class="menu-desc">공제회 지정<br>검진기관 안내</div>
   </a>
   <a href="{% url 'pension:search' %}" class="home-menu-card">
-    <div class="menu-icon" style="background: #FFF3DC;">💰</div>
+    <div class="menu-icon" style="background: var(--accent-light); color: var(--accent-dark);">💰</div>
     <div class="menu-label">퇴직공제<br>현장 확인</div>
     <div class="menu-desc">내 현장 가입<br>여부 조회</div>
   </a>
   <a href="{% url 'chatbot:chat' %}" class="home-menu-card">
-    <div class="menu-icon" style="background: #F0E8FF;">💬</div>
+    <div class="menu-icon" style="background: var(--border-light); color: var(--primary-light);">💬</div>
     <div class="menu-label">AI 상담사에게<br>물어보기</div>
     <div class="menu-desc">24시간 언제든<br>무료 상담</div>
   </a>
 </div>
 
+<a href="{% url 'health:emergency' %}" class="home-emergency-link" aria-label="긴급 도움">
+  <span class="home-emergency-icon">!</span>
+  <span>
+    <strong>긴급 도움</strong>
+    <small>가까운 응급실과 AED 바로 찾기</small>
+  </span>
+</a>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+async function loadWeatherNotice() {
+    const box = document.getElementById("weatherNotice");
+    if (!box) return;
+
+    try {
+        const res = await fetch("/health/api/weather/");
+        const data = await res.json();
+        if (!res.ok || !data.hours || data.hours.length === 0) return;
+
+        const risky = data.hours.find(h => h.warnings && h.warnings.length > 0);
+        const first = risky || data.hours[0];
+        const statusClass = risky ? "danger" : "normal";
+        const message = risky
+          ? first.warnings[0]
+          : "현재 서울 기준 작업 기상 위험이 낮습니다.";
+
+        box.className = `weather-notice ${statusClass}`;
+        box.innerHTML = `
+          <div>
+            <strong>${first.time} 작업주의</strong>
+            <p>${message}</p>
+          </div>
+          <a href="{% url 'health:map' %}" class="notice-action-btn">자세히</a>
+        `;
+        box.style.display = "flex";
+    } catch (e) {
+        box.style.display = "none";
+    }
+}
+
+window.addEventListener("load", loadWeatherNotice);
+</script>
 {% endblock %}

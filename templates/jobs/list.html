@@ -37,10 +37,55 @@
   <!-- 일자리 목록 영역 -->
 </div>
 
+<section class="tool-section">
+  <div class="tool-section-head">
+    <h2>교육훈련기관</h2>
+    <span>가까운 개강 과정</span>
+  </div>
+  <p class="section-desc" style="margin-bottom: 8px;">지역을 입력하면 앞으로 열리는 건설기능 훈련과정을 보여줍니다.</p>
+  <div style="display:flex; gap:8px;">
+    <input id="trainingRegion" class="search-input" placeholder="예: 서울, 수원, 전북" style="margin-bottom:0; flex:1;">
+    <button class="form-action-btn" onclick="loadTraining()">조회</button>
+  </div>
+  <div id="trainingContainer" style="margin-top: 12px;"></div>
+</section>
+
 {% endblock %}
 
 {% block extra_js %}
 <script>
+async function loadTraining() {
+    const region = document.getElementById("trainingRegion").value.trim();
+    const container = document.getElementById("trainingContainer");
+    container.innerHTML = '<div class="spinner"></div><div class="loading-msg">훈련과정을 불러오고 있습니다...</div>';
+
+    try {
+        const res = await fetch(`/jobs/api/training/?region=${encodeURIComponent(region)}`);
+        const data = await res.json();
+        if (data.trainings && data.trainings.length > 0) {
+            let html = `<p class="mini-caption">훈련과정 ${data.trainings.length}개</p>`;
+            data.trainings.forEach(t => {
+                const mapQuery = encodeURIComponent(`${t.address} ${t.name}`);
+                html += `
+                  <div class="mini-card">
+                    <strong>${t.course} · ${t.name}</strong>
+                    <p>${t.start} ~ ${t.end} · ${t.type} · ${t.capacity}명</p>
+                    <p>📍 ${t.address}</p>
+                    <div style="display:flex; gap:8px; margin-top:10px;">
+                    <a class="compact-call-btn" href="tel:${t.phone}">전화</a>
+                      <a class="map-link-btn" href="https://map.kakao.com/link/search/${mapQuery}" target="_blank">지도</a>
+                    </div>
+                  </div>`;
+            });
+            container.innerHTML = html;
+        } else {
+            container.innerHTML = `<div class="empty-state compact"><p>조건에 맞는 예정 훈련과정이 없습니다.</p></div>`;
+        }
+    } catch (e) {
+        container.innerHTML = `<div class="empty-state compact"><p>훈련과정을 불러오지 못했습니다.</p></div>`;
+    }
+}
+
 async function loadJobs() {
     const region = document.getElementById("regionSelect").value;
     const container = document.getElementById("jobsContainer");
