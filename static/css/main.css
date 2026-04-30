@@ -139,32 +139,36 @@ header .header-title {
 }
 
 body.large-text-mode {
-  --font-size-xs: 15px;
-  --font-size-sm: 18px;
-  --font-size-base: 20px;
-  --font-size-lg: 23px;
-  --font-size-xl: 27px;
-  --font-size-xxl: 31px;
+  --font-size-xs: 17px;
+  --font-size-sm: 20px;
+  --font-size-base: 23px;
+  --font-size-lg: 26px;
+  --font-size-xl: 30px;
+  --font-size-xxl: 34px;
 }
 
 body.large-text-mode .header-title {
-  font-size: 18px;
-  max-width: 210px;
+  font-size: 20px;
+  max-width: 190px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 body.large-text-mode .bottom-nav {
-  height: 78px;
+  height: 84px;
 }
 
 body.large-text-mode #mobile-wrapper {
-  padding-bottom: 86px;
+  padding-bottom: 94px;
+}
+
+body.large-text-mode .bottom-nav .icon {
+  font-size: 25px;
 }
 
 body.large-text-mode .bottom-nav a span:last-child {
-  font-size: 12px;
+  font-size: 14px;
 }
 
 body.large-text-mode .search-input,
@@ -174,6 +178,28 @@ body.large-text-mode .form-action-btn,
 body.large-text-mode .call-btn,
 body.large-text-mode .emergency-location-btn {
   min-height: 58px;
+}
+
+body.large-text-mode .job-card,
+body.large-text-mode .tool-section,
+body.large-text-mode .info-box,
+body.large-text-mode .mini-card,
+body.large-text-mode .nearby-card {
+  padding: 22px;
+}
+
+body.large-text-mode .badge {
+  font-size: 16px;
+  padding: 6px 14px;
+}
+
+body.large-text-mode .meta,
+body.large-text-mode .section-desc,
+body.large-text-mode .source-box,
+body.large-text-mode .menu-desc,
+body.large-text-mode .weather-notice p,
+body.large-text-mode .nearby-card p {
+  font-size: 18px;
 }
 
 /* ── 5. 메인 콘텐츠 ── */
