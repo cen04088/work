@@ -47,7 +47,7 @@ async function loadWeather() {
         hours.forEach(h => {
             const warnings = h.warnings && h.warnings.length
               ? h.warnings.map(w => `<div class="warning-line">${w}</div>`).join('')
-              : '<div class="ok-line">현재 작업 기상 위험이 낮습니다.</div>';
+              : '<div class="ok-line">작업하기에 무난한 날씨입니다.</div>';
             html += `
               <div class="mini-card weather-hour-card">
                 <strong>${h.time}</strong>

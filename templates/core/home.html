@@ -70,7 +70,7 @@
   <span class="home-emergency-icon">!</span>
   <span>
     <strong>긴급 도움</strong>
-    <small>가까운 응급실과 AED 바로 찾기</small>
+    <small>가까운 응급실 찾기</small>
   </span>
 </a>
 
@@ -92,7 +92,7 @@ async function loadWeatherNotice() {
         const statusClass = risky ? "danger" : "normal";
         const message = risky
           ? first.warnings[0]
-          : "현재 서울 기준 작업 기상 위험이 낮습니다.";
+          : "현재 서울 기준으로 작업하기에 무난한 날씨입니다.";
 
         box.className = `weather-notice ${statusClass}`;
         box.innerHTML = `
