@@ -204,14 +204,26 @@ body.large-text-mode .today-check-head span,
 body.large-text-mode .home-sync-note,
 body.large-text-mode .home-scenario p,
 body.large-text-mode .data-freshness,
-body.large-text-mode .data-freshness strong {
+body.large-text-mode .data-freshness strong,
+body.large-text-mode .health-benefit-hero p,
+body.large-text-mode .health-benefit-grid span,
+body.large-text-mode .health-apply-box p {
   font-size: 18px;
 }
 
 body.large-text-mode .today-check-card strong,
 body.large-text-mode .home-ai-link strong,
-body.large-text-mode .home-scenario strong {
+body.large-text-mode .home-scenario strong,
+body.large-text-mode .health-apply-box strong {
   font-size: 21px;
+}
+
+body.large-text-mode .health-benefit-hero strong {
+  font-size: 29px;
+}
+
+body.large-text-mode .health-benefit-grid strong {
+  font-size: 28px;
 }
 
 body.large-text-mode .daily-checklist label {
@@ -582,6 +594,113 @@ main { padding: 16px; }
 
 .data-freshness span {
   text-align: right;
+}
+
+.health-benefit-hero {
+  background: linear-gradient(135deg, var(--success) 0%, #2FA66A 100%);
+  color: #FFFFFF;
+  border-radius: var(--radius-md);
+  padding: 18px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow-sm);
+}
+
+.health-benefit-hero span,
+.health-benefit-hero strong {
+  display: block;
+}
+
+.health-benefit-hero span {
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 12px;
+  font-weight: 900;
+  margin-bottom: 4px;
+}
+
+.health-benefit-hero strong {
+  font-size: 23px;
+  line-height: 1.25;
+}
+
+.health-benefit-hero p {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+  line-height: 1.55;
+  margin-top: 8px;
+}
+
+.health-benefit-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.health-benefit-grid div {
+  background: #FFFFFF;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 14px 10px;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.health-benefit-grid strong,
+.health-benefit-grid span {
+  display: block;
+}
+
+.health-benefit-grid strong {
+  color: var(--success);
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+.health-benefit-grid span {
+  color: var(--text-sub);
+  font-size: 12px;
+  line-height: 1.35;
+  margin-top: 4px;
+}
+
+.health-rule-box {
+  background: #FFFFFF;
+}
+
+.health-apply-box {
+  background: #FFFFFF;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.health-apply-box strong {
+  display: block;
+  color: var(--primary);
+  font-size: var(--font-size-base);
+  line-height: 1.35;
+  margin-bottom: 5px;
+}
+
+.health-apply-box p {
+  color: var(--text-sub);
+  font-size: var(--font-size-sm);
+  line-height: 1.55;
+  margin-bottom: 12px;
+}
+
+.health-apply-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.health-apply-actions .btn-success,
+.health-apply-actions .map-link-btn {
+  flex: 1;
+  height: 46px;
+  font-size: 14px;
 }
 
 .tool-section {
