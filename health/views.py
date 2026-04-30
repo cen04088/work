@@ -231,7 +231,9 @@ def emergency_rooms_json(request):
     stage2 = request.GET.get("stage2", "강남구")
     lat = _request_float(request, "lat")
     lon = _request_float(request, "lon")
-    cache_key = f"er:{stage1}:{stage2}:{lat}:{lon}"
+    lat_key = round(lat, 3) if lat is not None else None
+    lon_key = round(lon, 3) if lon is not None else None
+    cache_key = f"er:{stage1}:{stage2}:{lat_key}:{lon_key}"
     cached = cache.get(cache_key)
     if cached:
         return JsonResponse(cached)
@@ -242,7 +244,7 @@ def emergency_rooms_json(request):
         else:
             results = _fetch_regional_emergency_rooms(api_key, stage1, stage2, lat, lon)
         payload = {"results": results, "stage1": stage1, "stage2": stage2, "is_live_api": True}
-        cache.set(cache_key, payload, 5 * 60)
+        cache.set(cache_key, payload, 30 * 60)
         return JsonResponse(payload)
     except Exception as exc:
         return _api_error(_safe_api_error("응급실", exc))
@@ -256,23 +258,22 @@ def _fetch_nearby_emergency_rooms(api_key, lat, lon):
             "WGS84_LON": str(lon),
             "WGS84_LAT": str(lat),
             "pageNo": "1",
-            "numOfRows": "10",
+            "numOfRows": "3",
         },
-        timeout=8,
+        timeout=4,
     )
     res.raise_for_status()
     items = _xml_items(res.text)
     results = []
-    for item in items[:10]:
-        detail = _fetch_emergency_room_detail(api_key, item.get("hpid"))
+    for item in items[:3]:
         item_lat = _pick_float(item, ("latitude", "wgs84Lat", "WGS84_LAT"))
         item_lon = _pick_float(item, ("longitude", "wgs84Lon", "WGS84_LON"))
         distance = _to_float(item.get("distance"))
         results.append({
-            "name": item.get("dutyName") or detail.get("dutyName") or "응급의료기관",
-            "address": item.get("dutyAddr") or detail.get("dutyAddr") or "",
-            "phone": detail.get("dutyTel3") or item.get("dutyTel1") or detail.get("dutyTel1") or "",
-            "bed": detail.get("hvec") or detail.get("hvs01") or "",
+            "name": item.get("dutyName") or "응급의료기관",
+            "address": item.get("dutyAddr") or "",
+            "phone": item.get("dutyTel1") or "",
+            "bed": "",
             "updated_at": "",
             "lat": item_lat,
             "lon": item_lon,
