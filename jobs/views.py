@@ -52,6 +52,9 @@ def get_centers_json(request):
             "name": c.name,
             "location": c.location,
             "phone": c.phone_number,
+            "operator": c.operator,
+            "hours": c.operating_hours,
+            "source_updated_at": c.source_updated_at,
         })
     return JsonResponse({"centers": centers})
 
