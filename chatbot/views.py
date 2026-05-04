@@ -95,6 +95,7 @@ def build_briefing_reply(user_message):
 
     region = extract_region(message) or "선택 지역"
     site_keyword = extract_labeled_text(message, ["현장명 또는 시공사", "현장명", "시공사"])
+    weather_summary = extract_labeled_text(message, ["기상 정보", "날씨 정보"])
     terms = extract_search_terms(site_keyword) if site_keyword else []
     site_qs = PensionSite.objects.none()
     for term in terms:
@@ -131,27 +132,30 @@ def build_briefing_reply(user_message):
         center_qs = center_qs.filter(q)
     center = center_qs.first()
 
-    health_status = "건설e음 또는 공제회 상담으로 자격을 확인하세요."
-
     site_line = (
         f"퇴직공제: {site.project_name} 확인 후보가 있어요."
         if site
-        else "퇴직공제: 현장명으로 가입현장을 다시 검색하세요."
+        else "퇴직공제: 출근 전 현장명으로 가입 여부를 확인하세요."
     )
     center_line = (
         f"취업지원: {center.region} {center.name}, 1666-1829."
         if center
-        else "취업지원: 일자리 메뉴에서 권역을 선택하세요."
+        else "일자리: 권역을 선택하면 취업지원 지사를 볼 수 있어요."
+    )
+    weather_line = (
+        f"날씨: {weather_summary}"
+        if weather_summary
+        else "날씨: 위치 권한을 허용하면 현재 위치 기준으로 확인합니다."
     )
 
     return sanitize_reply(
-        "오늘의 현장 브리핑입니다.\n"
-        f"1. 지역: {region}\n"
+        "오늘 출근 전 확인하세요.\n"
+        f"1. {weather_line}\n"
         f"2. {site_line}\n"
-        f"3. 건강검진: {health_status}\n"
-        "4. 날씨: 작업 날씨 메뉴에서 확인하세요. 위치 권한을 허용하면 현재 위치 기준입니다.\n"
+        "3. 보호구: 안전모·안전화·장갑·물은 출발 전 챙기세요.\n"
+        "4. 사고 시: 먼저 119, 앱의 긴급 도움에서 가까운 응급실을 확인하세요.\n"
         f"5. {center_line}\n"
-        "사고·산재는 119, 1350, 현장 안전관리자 확인이 필요합니다."
+        "산재·임금 문제는 1350 또는 현장 관리자 확인이 필요합니다."
     )
 
 

@@ -107,6 +107,7 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="{% static 'js/weather-location.js' %}"></script>
 <script src="{% static 'js/chat.js' %}"></script>
 <script>
 function send() {
@@ -130,14 +131,32 @@ function toggleBriefingForm() {
     form.style.display = form.style.display === "none" ? "block" : "none";
 }
 
-function sendBriefingFromChat() {
+async function buildChatWeatherBriefingText() {
+    try {
+        const grid = await getCurrentWeatherGrid();
+        const res = await fetch(`/health/api/weather/?nx=${grid.nx}&ny=${grid.ny}`);
+        const data = await res.json();
+        if (!res.ok || !data.hours || data.hours.length === 0) return `${grid.label} 날씨를 불러오지 못했습니다.`;
+
+        const risky = data.hours.find(h => h.warnings && h.warnings.length > 0);
+        const first = risky || data.hours[0];
+        const warning = risky ? first.warnings[0] : "작업하기에 무난한 날씨입니다.";
+        return `${grid.label} ${first.time}, 기온 ${first.temp ?? "-"}℃, 풍속 ${first.wind ?? "-"}m/s, 강수 ${first.rain || "-"}, ${warning}`;
+    } catch (e) {
+        return "날씨를 불러오지 못했습니다.";
+    }
+}
+
+async function sendBriefingFromChat() {
     const site = document.getElementById("chatSite").value.trim();
     const region = document.getElementById("chatRegion").value;
+    const weatherText = await buildChatWeatherBriefingText();
 
     const message = [
         "현장 브리핑 해줘.",
         site ? `현장명 또는 시공사: ${site}.` : "",
         region ? `근무 지역: ${region}.` : "",
+        `기상 정보: ${weatherText}.`,
         "퇴직공제, 건강검진 자격 확인 방법, 날씨, 응급실, 취업지원 지사를 쉽게 안내해줘."
     ].filter(Boolean).join(" ");
 
