@@ -93,7 +93,7 @@ def build_briefing_reply(user_message):
     if "현장 브리핑" not in message and "출근 브리핑" not in message:
         return ""
 
-    region = extract_region(message) or "선택 지역"
+    region = extract_region(message)
     site_keyword = extract_labeled_text(message, ["현장명 또는 시공사", "현장명", "시공사"])
     weather_summary = extract_labeled_text(message, ["기상 정보", "날씨 정보"])
     terms = extract_search_terms(site_keyword) if site_keyword else []
@@ -107,7 +107,7 @@ def build_briefing_reply(user_message):
     site = site_qs.distinct().first()
 
     center_qs = EmploymentSupportCenter.objects.all()
-    if region != "선택 지역":
+    if region:
         region_groups = {
             "서울": ["서울", "경기", "인천"],
             "경기": ["서울", "경기", "인천"],
@@ -135,7 +135,7 @@ def build_briefing_reply(user_message):
     site_line = (
         f"퇴직공제: {site.project_name} 확인 후보가 있어요."
         if site
-        else "퇴직공제: 출근 전 현장명으로 가입 여부를 확인하세요."
+        else "퇴직공제: 현장 도착 전 앱에서 현장명으로 가입 여부를 확인하세요."
     )
     center_line = (
         f"취업지원: {center.region} {center.name}, 1666-1829."
