@@ -775,13 +775,60 @@ main { padding: 16px; }
 .msds-photo-panel,
 .msds-search-card,
 .msds-action-list,
-.msds-result-card {
+.msds-result-card,
+.msds-simple-steps {
   background: #FFFFFF;
   border: 1px solid var(--border-light);
   border-radius: var(--radius-sm);
   padding: 14px;
   margin-bottom: 12px;
   box-shadow: var(--shadow-sm);
+}
+
+.msds-simple-steps strong,
+.msds-card-title {
+  display: block;
+  color: var(--primary);
+  font-size: var(--font-size-base);
+  line-height: 1.35;
+  margin-bottom: 8px;
+}
+
+.msds-simple-steps ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.msds-simple-steps li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+  font-size: var(--font-size-sm);
+  font-weight: 800;
+  line-height: 1.45;
+  padding: 8px 0;
+  border-top: 1px solid var(--border-light);
+}
+
+.msds-simple-steps li:first-child {
+  border-top: none;
+}
+
+.msds-simple-steps li::before {
+  content: "!";
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--warning-light);
+  color: var(--warning);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 900;
+  flex-shrink: 0;
 }
 
 .msds-photo-button {
