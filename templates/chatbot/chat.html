@@ -10,6 +10,8 @@
     padding: 0 !important;
     display: flex;
     flex-direction: column;
+    height: calc(100dvh - 56px);
+    overflow: hidden;
   }
 
   #chat-wrap {
@@ -17,17 +19,28 @@
     padding: 16px;
     display: flex;
     flex-direction: column;
-    /* 헤더56 + 입력바70 + 하단탭72 = 198px */
-    height: calc(100vh - 198px);
+    height: calc(100dvh - 56px - 72px - 74px);
+    max-height: calc(100dvh - 56px - 72px - 74px);
+    min-height: 0;
     overflow-y: auto;
+    overscroll-behavior: contain;
     scroll-behavior: smooth;
     background: var(--bg);
+    padding-bottom: 96px;
+    scroll-padding-bottom: 96px;
+  }
+
+  body.large-text-mode #chat-wrap {
+    height: calc(100dvh - 56px - 84px - 86px);
+    max-height: calc(100dvh - 56px - 84px - 86px);
+    padding-bottom: 116px;
+    scroll-padding-bottom: 116px;
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<div id="chat-wrap">
+<div id="chat-wrap" class="chat-wrap">
   <!-- 안내 말풍선 -->
   <div class="bubble bot" style="word-break: keep-all; padding: 14px 16px 6px 16px;">
     <p style="margin: 0 0 4px 0; font-weight: 700;">안녕하세요! 현장이음 AI 상담사입니다. 😊</p>

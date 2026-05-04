@@ -12,6 +12,7 @@ async function sendMessage(userText) {
     const res = await fetch("/chatbot/api/", {
       method: "POST",
       headers: { "Content-Type": "application/json", "X-CSRFToken": getCsrfToken() },
+      credentials: "same-origin",
       body: JSON.stringify({ message: currentMessage, history: history.slice(-10) }),
     });
     const data = await res.json();
@@ -38,7 +39,7 @@ function appendBubble(text, role) {
   div.textContent = text;
   wrap.appendChild(div);
   // 스크롤을 최신 메시지로
-  setTimeout(() => { wrap.scrollTop = wrap.scrollHeight; }, 50);
+  scrollChatToBottom();
 }
 
 function showLoading() {
@@ -52,12 +53,20 @@ function showLoading() {
         <span></span><span></span><span></span>
       </div>`;
     wrap.appendChild(div);
-    setTimeout(() => { wrap.scrollTop = wrap.scrollHeight; }, 50);
+    scrollChatToBottom();
 }
 
 function hideLoading() {
     const el = document.getElementById("loading-bubble");
     if (el) el.remove();
+}
+
+function scrollChatToBottom() {
+  const wrap = document.getElementById("chat-wrap");
+  if (!wrap) return;
+  requestAnimationFrame(() => {
+    wrap.scrollTo({ top: wrap.scrollHeight, behavior: "smooth" });
+  });
 }
 
 function getCsrfToken() {

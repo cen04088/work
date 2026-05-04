@@ -1,12 +1,14 @@
 import json
 import re
 from django.conf import settings
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.http import JsonResponse
 from django.views.generic import TemplateView
 
 SYSTEM_PROMPT = """
 당신은 '현장이음' 앱의 AI 상담사입니다.
-건설 일용직 근로자, 특히 50대 이상 분들을 위해 쉽고 친절하게 답변하세요.
+건설 일용직 근로자를 위해 쉽고 친절하게 답변하세요.
 
 답변 원칙:
 1. 짧고 쉬운 문장 사용 (한 문장 20자 이내 권장)
@@ -17,6 +19,7 @@ SYSTEM_PROMPT = """
 6. 답변은 5줄 이내로 마무리
 7. 앱 메뉴명과 다음 행동을 먼저 안내
 8. 데이터 예시는 최대 3개만 사용
+9. "어르신", "어머니", "아버님" 같은 호칭은 사용하지 않기
 
 주요 답변 영역:
 - 퇴직공제 적립금 수령 방법
@@ -26,6 +29,7 @@ SYSTEM_PROMPT = """
 - 현장 안전 주의사항
 """
 
+@method_decorator(ensure_csrf_cookie, name="dispatch")
 class ChatView(TemplateView):
     template_name = 'chatbot/chat.html'
 
@@ -231,11 +235,24 @@ def chat_api(request):
             )
         )
         
-        return JsonResponse({"reply": response.text, "status": "ok"})
+        return JsonResponse({"reply": sanitize_reply(response.text), "status": "ok"})
         
     except Exception as e:
         print(f"Chatbot Error: {e}")
         return JsonResponse({
-            "reply": fallback_reply(user_message if 'user_message' in locals() else ""),
+            "reply": sanitize_reply(fallback_reply(user_message if 'user_message' in locals() else "")),
             "status": "ok"
         })
+
+
+def sanitize_reply(text):
+    replacements = {
+        "어르신, ": "",
+        "어르신 ": "",
+        "어르신": "근로자님",
+        "아버님": "근로자님",
+        "어머니": "근로자님",
+    }
+    for source, target in replacements.items():
+        text = text.replace(source, target)
+    return text.strip()
