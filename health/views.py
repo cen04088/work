@@ -18,6 +18,10 @@ class WeatherNoticeView(TemplateView):
 class EmergencyHelpView(TemplateView):
     template_name = 'health/emergency_help.html'
 
+
+class MsdsAssistView(TemplateView):
+    template_name = 'health/msds_assist.html'
+
 def clinics_json(request):
     """지도용 종합건강검진 수검기관 (DB 연동)"""
     lat = request.GET.get("lat", 37.5665)
@@ -96,6 +100,66 @@ def safety_workplaces_json(request):
         "is_live_api": False,
         "source": "한국산업안전보건공단_위험성평가 결과 우수사업장 현황",
     })
+
+
+def msds_search_json(request):
+    """KOSHA 물질안전보건자료 목록 검색."""
+    keyword = (request.GET.get("q") or "").strip()
+    search_type = (request.GET.get("type") or "0").strip()
+    if len(keyword) < 2:
+        return JsonResponse({"results": [], "error": "검색어를 2글자 이상 입력해주세요."}, status=400)
+
+    api_key = getattr(settings, "MSDS_API_KEY", "") or _public_data_key("kosha")
+    if not api_key:
+        return _api_error("MSDS_API_KEY 또는 PUBLIC_DATA_API_KEY가 필요합니다.", 503)
+
+    cache_key = f"msds:{search_type}:{keyword}"
+    cached = cache.get(cache_key)
+    if cached:
+        return JsonResponse(cached)
+
+    try:
+        response = requests.get(
+            "https://apis.data.go.kr/B552468/msdschem/getChemList",
+            params={
+                "serviceKey": api_key,
+                "searchWrd": keyword,
+                "searchCnd": search_type,
+                "numOfRows": "10",
+                "pageNo": "1",
+            },
+            timeout=8,
+        )
+        response.raise_for_status()
+        root = ElementTree.fromstring(response.text)
+        result_code = root.findtext(".//resultCode", "")
+        result_msg = root.findtext(".//resultMsg", "")
+        if result_code and result_code != "00":
+            return _api_error(result_msg or "MSDS API 응답 오류")
+
+        results = []
+        for item in root.findall(".//item"):
+            results.append({
+                "chem_id": item.findtext("chemId", ""),
+                "name": item.findtext("chemNameKor", ""),
+                "cas_no": item.findtext("casNo", ""),
+                "ke_no": item.findtext("keNo", ""),
+                "en_no": item.findtext("enNo", ""),
+                "un_no": item.findtext("unNo", ""),
+                "last_date": item.findtext("lastDate", "")[:10],
+            })
+
+        payload = {
+            "results": results,
+            "count": len(results),
+            "is_live_api": True,
+            "source": "한국산업안전보건공단_물질안전보건자료",
+            "official_url": "https://msds.kosha.or.kr/MSDSInfo/kcic/msdssearchMsds.do",
+        }
+        cache.set(cache_key, payload, 60 * 60)
+        return JsonResponse(payload)
+    except Exception as exc:
+        return _api_error(_safe_api_error("MSDS", exc))
 
 
 def _xml_items(xml_text):

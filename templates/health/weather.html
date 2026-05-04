@@ -21,7 +21,7 @@
     <div class="info-title">현장 작업 전 확인하세요</div>
     <ul>
       <li>폭염, 한파, 강수, 강풍 조건을 기준으로 작업 주의 문구를 표시합니다.</li>
-      <li>현재는 서울 기준 단기예보를 사용합니다.</li>
+      <li>위치 권한을 허용하면 현재 위치 기준으로 예보를 표시합니다.</li>
     </ul>
   </div>
 
@@ -36,19 +36,25 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="{% static 'js/weather-location.js' %}"></script>
 <script>
 async function loadWeather() {
     const container = document.getElementById("weatherList");
     container.innerHTML = '<div class="spinner"></div><div class="loading-msg">기상청 예보를 확인하고 있습니다...</div>';
 
     try {
-        const res = await fetch('/health/api/weather/');
+        const grid = await getCurrentWeatherGrid();
+        const res = await fetch(`/health/api/weather/?nx=${grid.nx}&ny=${grid.ny}`);
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || '기상 정보를 불러오지 못했습니다.');
 
         const risky = data.hours.filter(h => h.warnings && h.warnings.length > 0);
         const hours = risky.length ? risky : data.hours.slice(0, 6);
-        let html = `<p class="mini-caption">기준 시각 ${data.base_time}</p>`;
+        let html = `
+          <div class="weather-location-chip ${grid.isFallback ? 'fallback' : ''}">
+            ${grid.label} · 격자 ${grid.nx}, ${grid.ny}
+          </div>
+          <p class="mini-caption">기준 시각 ${data.base_time}</p>`;
         hours.forEach(h => {
             const warnings = h.warnings && h.warnings.length
               ? h.warnings.map(w => `<div class="warning-line">${w}</div>`).join('')

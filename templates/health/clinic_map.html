@@ -40,14 +40,11 @@
 
   <div class="health-apply-box">
     <strong>신청 방법</strong>
-    <p>공고가 열리면 건설근로자 하나로서비스, 공제회 앱, 지사 방문, 우편·팩스·이메일로 신청할 수 있습니다.</p>
+    <p>공고가 열리면 건설e음, 공제회 앱, 지사 방문, 우편·팩스·이메일로 신청할 수 있습니다.</p>
     <div class="health-apply-actions">
       <a href="tel:1666-1122" class="btn-success">상담 1666-1122</a>
-      <a href="https://1122.cw.or.kr" target="_blank" class="map-link-btn">하나로서비스</a>
+      <a href="https://eum.cw.or.kr/web/mai/WEBMAI020M00" target="_blank" class="map-link-btn">건설e음</a>
     </div>
-    <button type="button" onclick="focusClinicRegion()" class="btn-primary" style="margin-top: 12px;">
-      아래에서 가까운 검진기관 찾기
-    </button>
   </div>
 
   <div class="data-freshness">
@@ -60,6 +57,12 @@
       {% endif %}
     </span>
   </div>
+
+  <a href="{% url 'health:msds' %}" class="msds-entry-link">
+    <span>MSDS</span>
+    <strong>화학물질 대처 확인</strong>
+    <small>라벨 사진과 물질명으로 공식 안전보건자료를 조회합니다.</small>
+  </a>
 
   <p class="section-desc" style="margin-bottom: 8px;">가까운 권역을 선택하면 검진기관 목록을 보여줍니다.</p>
   <select id="regionSelect" class="search-input" onchange="loadClinics()">
@@ -117,13 +120,6 @@
 
 {% block extra_js %}
 <script>
-function focusClinicRegion() {
-    const select = document.getElementById("regionSelect");
-    if (!select) return;
-    select.scrollIntoView({ behavior: "smooth", block: "center" });
-    setTimeout(() => select.focus(), 350);
-}
-
 async function loadClinics() {
     const region = document.getElementById("regionSelect").value;
     const listContainer = document.getElementById("clinicsList");

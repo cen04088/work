@@ -27,6 +27,11 @@ SYSTEM_PROMPT = """
 - 무료 건강검진 신청 방법  
 - 일자리 찾는 방법
 - 현장 안전 주의사항
+
+현장 브리핑 원칙:
+- 사용자가 현장명, 지역, 적립일수를 주면 출근 전 브리핑으로 답변
+- 퇴직공제 가입현장 확인, 건강검진 자격 가능성, 날씨 확인, 응급실/취업지원 연결을 함께 안내
+- 산재, 임금체불, 사고, 화학물질은 참고 안내임을 밝히고 119, 고용노동부 1350, 근로복지공단, 현장 안전관리자 확인을 안내
 """
 
 @method_decorator(ensure_csrf_cookie, name="dispatch")
@@ -59,6 +64,105 @@ def extract_search_terms(message):
         token for token in cleaned.split()
         if len(token) >= 2 and token not in stopwords
     ][:3]
+
+
+def extract_number_after(message, keywords):
+    for keyword in keywords:
+        pattern = rf"{keyword}\D{{0,8}}(\d+)"
+        match = re.search(pattern, message)
+        if match:
+            return int(match.group(1))
+    return None
+
+
+def extract_labeled_text(message, labels):
+    for label in labels:
+        pattern = rf"{label}\s*:\s*([^\.。\n]+)"
+        match = re.search(pattern, message)
+        if match:
+            return match.group(1).strip()
+    return ""
+
+
+def build_briefing_reply(user_message):
+    from jobs.models import EmploymentSupportCenter
+    from pension.models import PensionSite
+    from django.db.models import Q
+
+    message = user_message
+    if "현장 브리핑" not in message and "출근 브리핑" not in message:
+        return ""
+
+    region = extract_region(message) or "선택 지역"
+    site_keyword = extract_labeled_text(message, ["현장명 또는 시공사", "현장명", "시공사"])
+    terms = extract_search_terms(site_keyword) if site_keyword else []
+    total_days = extract_number_after(message, ["총 적립일수", "총적립", "적립일수"])
+    recent_days = extract_number_after(message, ["최근 12개월", "최근 근로일수", "최근"])
+
+    site_qs = PensionSite.objects.none()
+    for term in terms:
+        site_qs = site_qs | PensionSite.objects.filter(
+            Q(project_name__icontains=term)
+            | Q(company_name__icontains=term)
+            | Q(address__icontains=term)
+        )
+    site = site_qs.distinct().first()
+
+    center_qs = EmploymentSupportCenter.objects.all()
+    if region != "선택 지역":
+        region_groups = {
+            "서울": ["서울", "경기", "인천"],
+            "경기": ["서울", "경기", "인천"],
+            "인천": ["서울", "경기", "인천"],
+            "광주": ["광주", "전남", "전북"],
+            "전남": ["광주", "전남", "전북"],
+            "전북": ["광주", "전남", "전북"],
+            "대전": ["대전", "세종", "충남", "충북"],
+            "충남": ["대전", "세종", "충남", "충북"],
+            "충북": ["대전", "세종", "충남", "충북"],
+            "세종": ["대전", "세종", "충남", "충북"],
+            "부산": ["부산", "울산", "경남"],
+            "울산": ["부산", "울산", "경남"],
+            "경남": ["부산", "울산", "경남"],
+            "대구": ["대구", "경북"],
+            "경북": ["대구", "경북"],
+        }
+        keywords = region_groups.get(region, [region])
+        q = Q()
+        for keyword in keywords:
+            q |= Q(region__icontains=keyword) | Q(location__icontains=keyword)
+        center_qs = center_qs.filter(q)
+    center = center_qs.first()
+
+    if total_days is not None and recent_days is not None:
+        health_status = (
+            "건강검진 신청 조건에 가까워요."
+            if total_days >= 252 and recent_days >= 100
+            else "건강검진 조건을 더 확인해야 해요."
+        )
+    else:
+        health_status = "적립일수를 넣으면 검진 조건을 판단할 수 있어요."
+
+    site_line = (
+        f"퇴직공제: {site.project_name} 확인 후보가 있어요."
+        if site
+        else "퇴직공제: 현장명으로 가입현장을 다시 검색하세요."
+    )
+    center_line = (
+        f"취업지원: {center.region} {center.name}, 1666-1829."
+        if center
+        else "취업지원: 일자리 메뉴에서 권역을 선택하세요."
+    )
+
+    return sanitize_reply(
+        "오늘의 현장 브리핑입니다.\n"
+        f"1. 지역: {region}\n"
+        f"2. {site_line}\n"
+        f"3. 건강검진: {health_status}\n"
+        "4. 날씨: 작업 날씨 메뉴에서 확인하세요. 위치 권한을 허용하면 현재 위치 기준입니다.\n"
+        f"5. {center_line}\n"
+        "사고·산재는 119, 1350, 현장 안전관리자 확인이 필요합니다."
+    )
 
 
 def build_app_context(user_message):
@@ -133,6 +237,10 @@ def build_app_context(user_message):
 
 def fallback_reply(user_message):
     message = user_message.lower()
+    briefing = build_briefing_reply(user_message)
+    if briefing:
+        return briefing
+
     context = build_app_context(user_message)
 
     if "퇴직" in message or "공제" in message:
@@ -186,6 +294,10 @@ def chat_api(request):
         
         if not user_message:
             return JsonResponse({"error": "메시지를 입력해주세요", "status": "error"}, status=400)
+
+        briefing = build_briefing_reply(user_message)
+        if briefing:
+            return JsonResponse({"reply": briefing, "status": "ok"})
 
         if not settings.GEMINI_API_KEY:
             return JsonResponse({"reply": fallback_reply(user_message), "status": "ok"})
