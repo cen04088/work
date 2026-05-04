@@ -203,7 +203,6 @@ body.large-text-mode .today-check-card p,
 body.large-text-mode .today-check-head span,
 body.large-text-mode .home-sync-note,
 body.large-text-mode .home-scenario p,
-body.large-text-mode .briefing-disclaimer,
 body.large-text-mode .data-freshness,
 body.large-text-mode .data-freshness strong,
 body.large-text-mode .health-benefit-hero p,
@@ -1464,38 +1463,6 @@ main { padding: 16px; }
   margin: 0;
 }
 
-.field-briefing-card {
-  background: #FFFFFF;
-  border: 1px solid #D6E2F5;
-  border-top: 4px solid var(--primary-light);
-  border-radius: var(--radius-md);
-  padding: 14px;
-  margin-bottom: 16px;
-  box-shadow: var(--shadow-sm);
-}
-
-.briefing-grid {
-  display: grid;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-.briefing-grid {
-  grid-template-columns: 1fr;
-}
-
-.briefing-grid .search-input {
-  margin-bottom: 0;
-}
-
-.briefing-disclaimer {
-  color: var(--text-sub);
-  font-size: 12px;
-  line-height: 1.4;
-  margin-top: 8px;
-  text-align: center;
-}
-
 .data-summary div {
   background: #FFFFFF;
   border: 1px solid var(--border-light);
@@ -2097,6 +2064,10 @@ body.large-text-mode .chat-briefing-toggle {
   color: var(--text);
   font-size: 15px;
   line-height: 1.45;
+}
+
+.home-ai-link-prominent {
+  margin-bottom: 16px;
 }
 
 .home-sync-note {
