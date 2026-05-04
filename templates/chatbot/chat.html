@@ -128,14 +128,14 @@
       "입력 없이 당일 출근하는 건설 일용직 근로자가 바로 확인할 내용만 안내해줘."
     ].filter(Boolean).join(" ");
 
-    sendMessage(message);
+    sendMessage(message, { showUserBubble: false });
   }
 
   window.addEventListener("load", () => {
     const pending = sessionStorage.getItem("pendingFieldBriefing");
     if (!pending) return;
     sessionStorage.removeItem("pendingFieldBriefing");
-    setTimeout(() => sendMessage(pending), 250);
+    setTimeout(() => sendMessage(pending, { showUserBubble: false }), 250);
   });
 </script>
 {% endblock %}

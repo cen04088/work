@@ -1,9 +1,12 @@
 let history = [];  // [{role, content}]
 
-async function sendMessage(userText) {
+async function sendMessage(userText, options = {}) {
   if (!userText.trim()) return;
-  
-  appendBubble(userText, "user");
+
+  const showUserBubble = options.showUserBubble !== false;
+  if (showUserBubble) {
+    appendBubble(userText, "user");
+  }
   showLoading();
   
   const currentMessage = userText;
