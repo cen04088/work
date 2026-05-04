@@ -29,8 +29,8 @@ SYSTEM_PROMPT = """
 - 현장 안전 주의사항
 
 현장 브리핑 원칙:
-- 사용자가 현장명, 지역, 적립일수를 주면 출근 전 브리핑으로 답변
-- 퇴직공제 가입현장 확인, 건강검진 자격 가능성, 날씨 확인, 응급실/취업지원 연결을 함께 안내
+- 사용자가 현장명과 지역을 주면 출근 전 브리핑으로 답변
+- 퇴직공제 가입현장 확인, 건강검진 자격 확인 방법, 날씨 확인, 응급실/취업지원 연결을 함께 안내
 - 산재, 임금체불, 사고, 화학물질은 참고 안내임을 밝히고 119, 고용노동부 1350, 근로복지공단, 현장 안전관리자 확인을 안내
 """
 
@@ -96,9 +96,6 @@ def build_briefing_reply(user_message):
     region = extract_region(message) or "선택 지역"
     site_keyword = extract_labeled_text(message, ["현장명 또는 시공사", "현장명", "시공사"])
     terms = extract_search_terms(site_keyword) if site_keyword else []
-    total_days = extract_number_after(message, ["총 적립일수", "총적립", "적립일수"])
-    recent_days = extract_number_after(message, ["최근 12개월", "최근 근로일수", "최근"])
-
     site_qs = PensionSite.objects.none()
     for term in terms:
         site_qs = site_qs | PensionSite.objects.filter(
@@ -134,14 +131,7 @@ def build_briefing_reply(user_message):
         center_qs = center_qs.filter(q)
     center = center_qs.first()
 
-    if total_days is not None and recent_days is not None:
-        health_status = (
-            "건강검진 신청 조건에 가까워요."
-            if total_days >= 252 and recent_days >= 100
-            else "건강검진 조건을 더 확인해야 해요."
-        )
-    else:
-        health_status = "적립일수를 넣으면 검진 조건을 판단할 수 있어요."
+    health_status = "건설e음 또는 공제회 상담으로 자격을 확인하세요."
 
     site_line = (
         f"퇴직공제: {site.project_name} 확인 후보가 있어요."

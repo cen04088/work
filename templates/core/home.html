@@ -50,7 +50,7 @@
   <div class="today-check-head">
     <div>
       <strong>AI 현장 브리핑</strong>
-      <span>현장 정보를 넣으면 출근 전 확인할 일을 한 번에 안내합니다</span>
+      <span>현장명과 지역만 넣으면 출근 전 확인할 일을 안내합니다</span>
     </div>
   </div>
   <div class="briefing-grid">
@@ -67,10 +67,6 @@
       <option value="부산">부산/울산/경남</option>
       <option value="제주">제주</option>
     </select>
-  </div>
-  <div class="briefing-days-row">
-    <input id="briefingTotalDays" class="search-input" type="number" min="0" inputmode="numeric" placeholder="총 적립일수">
-    <input id="briefingRecentDays" class="search-input" type="number" min="0" inputmode="numeric" placeholder="최근 12개월">
   </div>
   <button type="button" class="btn-primary" onclick="startFieldBriefing()">브리핑 받기</button>
   <p class="briefing-disclaimer">개인정보 없이 입력한 내용만으로 참고 안내합니다.</p>
@@ -147,7 +143,7 @@
 
 <a href="{% url 'chatbot:chat' %}" class="home-ai-link">
   <span>AI 현장지원</span>
-  <strong>현장명·지역·적립일수로 출근 전 브리핑을 받아보세요</strong>
+  <strong>현장명과 지역으로 출근 전 브리핑을 받아보세요</strong>
 </a>
 
 {% if public_data_synced_at %}
@@ -212,16 +208,12 @@ window.addEventListener("load", initDailyChecklist);
 function startFieldBriefing() {
     const site = document.getElementById("briefingSite").value.trim();
     const region = document.getElementById("briefingRegion").value;
-    const totalDays = document.getElementById("briefingTotalDays").value;
-    const recentDays = document.getElementById("briefingRecentDays").value;
 
     const message = [
         "현장 브리핑 해줘.",
         site ? `현장명 또는 시공사: ${site}.` : "",
         region ? `근무 지역: ${region}.` : "",
-        totalDays ? `총 적립일수: ${totalDays}일.` : "",
-        recentDays ? `최근 12개월 적립일수: ${recentDays}일.` : "",
-        "퇴직공제 가입 여부, 무료 건강검진 자격, 작업 날씨, 가까운 응급실과 취업지원 지사를 한 번에 안내해줘."
+        "퇴직공제 가입 여부, 건강검진 자격 확인 방법, 작업 날씨, 가까운 응급실과 취업지원 지사를 한 번에 안내해줘."
     ].filter(Boolean).join(" ");
 
     sessionStorage.setItem("pendingFieldBriefing", message);

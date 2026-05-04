@@ -1474,8 +1474,7 @@ main { padding: 16px; }
   box-shadow: var(--shadow-sm);
 }
 
-.briefing-grid,
-.briefing-days-row {
+.briefing-grid {
   display: grid;
   gap: 8px;
   margin-bottom: 8px;
@@ -1485,12 +1484,7 @@ main { padding: 16px; }
   grid-template-columns: 1fr;
 }
 
-.briefing-days-row {
-  grid-template-columns: 1fr 1fr;
-}
-
-.briefing-grid .search-input,
-.briefing-days-row .search-input {
+.briefing-grid .search-input {
   margin-bottom: 0;
 }
 
@@ -1712,16 +1706,6 @@ main { padding: 16px; }
 }
 
 .chat-briefing-form .search-input {
-  margin-bottom: 8px;
-}
-
-.chat-briefing-days {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
-.chat-briefing-days .search-input {
   margin-bottom: 8px;
 }
 

@@ -81,10 +81,6 @@
         <option value="부산">부산/울산/경남</option>
         <option value="제주">제주</option>
       </select>
-      <div class="chat-briefing-days">
-        <input id="chatTotalDays" class="search-input" type="number" min="0" inputmode="numeric" placeholder="총 적립일수">
-        <input id="chatRecentDays" class="search-input" type="number" min="0" inputmode="numeric" placeholder="최근 12개월">
-      </div>
       <button type="button" class="btn-primary" onclick="sendBriefingFromChat()">브리핑 받기</button>
     </div>
   </div>
@@ -137,16 +133,12 @@ function toggleBriefingForm() {
 function sendBriefingFromChat() {
     const site = document.getElementById("chatSite").value.trim();
     const region = document.getElementById("chatRegion").value;
-    const totalDays = document.getElementById("chatTotalDays").value;
-    const recentDays = document.getElementById("chatRecentDays").value;
 
     const message = [
         "현장 브리핑 해줘.",
         site ? `현장명 또는 시공사: ${site}.` : "",
         region ? `근무 지역: ${region}.` : "",
-        totalDays ? `총 적립일수: ${totalDays}일.` : "",
-        recentDays ? `최근 12개월 적립일수: ${recentDays}일.` : "",
-        "퇴직공제, 건강검진, 날씨, 응급실, 취업지원 지사를 쉽게 안내해줘."
+        "퇴직공제, 건강검진 자격 확인 방법, 날씨, 응급실, 취업지원 지사를 쉽게 안내해줘."
     ].filter(Boolean).join(" ");
 
     sendMessage(message);
