@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block title %}AI상담{% endblock %}
-{% block header_title %}AI 상담사{% endblock %}
+{% block header_title %}쉬운 AI 상담{% endblock %}
 
 {% block extra_head %}
 <style>
@@ -41,20 +41,51 @@
 
 {% block content %}
 <div id="chat-wrap" class="chat-wrap">
-  <!-- 안내 말풍선 -->
-  <div class="bubble bot" style="word-break: keep-all; padding: 14px 16px 6px 16px;">
-    <p style="margin: 0 0 4px 0; font-weight: 700;">현장이음 AI 현장지원입니다.</p>
-    <p style="margin: 0 0 6px 0; color: var(--text); font-size: 16px;">현장명, 지역, 적립일수를 알려주면 출근 전 확인할 일을 묶어서 안내합니다.</p>
-    <div style="font-size: 16px; color: var(--text); line-height: 1.6; border-top: 1px solid var(--border-light); padding-top: 6px;">
-      "현장 브리핑 해줘"<br>
-      "퇴직공제 가입현장인지 확인하려면?"<br>
-      "건강검진 조건 알려줘"
+  <div class="chat-guide-panel">
+    <span>쉬운 상담</span>
+    <strong>필요한 내용을 눌러주세요</strong>
+    <p>글을 길게 쓰지 않아도 됩니다. 아래 버튼을 누르면 바로 안내해드립니다.</p>
+
+    <div class="chat-choice-grid">
+      <button type="button" onclick="sendQuickQuestion('퇴직공제 가입현장 확인 방법을 쉽게 알려줘')">
+        <b>퇴직공제</b>
+        <small>현장 가입 확인</small>
+      </button>
+      <button type="button" onclick="sendQuickQuestion('무료 건강검진 신청 조건과 기관 찾는 방법을 쉽게 알려줘')">
+        <b>건강검진</b>
+        <small>자격·기관 확인</small>
+      </button>
+      <button type="button" onclick="sendQuickQuestion('가까운 취업지원 지사와 교육훈련기관 이용 방법을 쉽게 알려줘')">
+        <b>일자리</b>
+        <small>지사·교육훈련</small>
+      </button>
+      <button type="button" onclick="sendQuickQuestion('사고가 났을 때 가까운 응급실 찾는 방법과 먼저 할 일을 알려줘')">
+        <b>긴급상황</b>
+        <small>응급실·119</small>
+      </button>
     </div>
-    <div class="quick-question-row">
-      <button type="button" onclick="sendQuickQuestion('현장 브리핑 해줘. 근무 지역: 서울. 총 적립일수: 260일. 최근 12개월 적립일수: 110일.')">현장 브리핑</button>
-      <button type="button" onclick="sendQuickQuestion('내 현장이 퇴직공제 가입현장인지 확인하려면?')">퇴직공제</button>
-      <button type="button" onclick="sendQuickQuestion('가까운 무료 건강검진기관은 어디서 찾나요?')">건강검진</button>
-      <button type="button" onclick="sendQuickQuestion('취업지원 지사는 어떻게 이용하나요?')">취업지원</button>
+
+    <button type="button" class="chat-briefing-toggle" onclick="toggleBriefingForm()">출근 전 브리핑 만들기</button>
+
+    <div id="chatBriefingForm" class="chat-briefing-form" style="display:none;">
+      <input id="chatSite" class="search-input" type="text" placeholder="현장명 또는 시공사">
+      <select id="chatRegion" class="search-input">
+        <option value="">근무 지역 선택</option>
+        <option value="서울">서울</option>
+        <option value="경기">경기</option>
+        <option value="인천">인천</option>
+        <option value="강원">강원</option>
+        <option value="대전">대전/충청</option>
+        <option value="광주">광주/전남/전북</option>
+        <option value="대구">대구/경북</option>
+        <option value="부산">부산/울산/경남</option>
+        <option value="제주">제주</option>
+      </select>
+      <div class="chat-briefing-days">
+        <input id="chatTotalDays" class="search-input" type="number" min="0" inputmode="numeric" placeholder="총 적립일수">
+        <input id="chatRecentDays" class="search-input" type="number" min="0" inputmode="numeric" placeholder="최근 12개월">
+      </div>
+      <button type="button" class="btn-primary" onclick="sendBriefingFromChat()">브리핑 받기</button>
     </div>
   </div>
 </div>
@@ -71,7 +102,7 @@
     type="text"
     id="chat-input"
     class="chat-input"
-    placeholder="궁금한 점을 입력하세요"
+    placeholder="직접 물어보기"
     onkeypress="if(event.key==='Enter') send()"
     autocomplete="off"
   >
@@ -95,6 +126,30 @@ function sendQuickQuestion(text) {
     const input = document.getElementById('chat-input');
     if (input) input.value = text;
     send();
+}
+
+function toggleBriefingForm() {
+    const form = document.getElementById("chatBriefingForm");
+    if (!form) return;
+    form.style.display = form.style.display === "none" ? "block" : "none";
+}
+
+function sendBriefingFromChat() {
+    const site = document.getElementById("chatSite").value.trim();
+    const region = document.getElementById("chatRegion").value;
+    const totalDays = document.getElementById("chatTotalDays").value;
+    const recentDays = document.getElementById("chatRecentDays").value;
+
+    const message = [
+        "현장 브리핑 해줘.",
+        site ? `현장명 또는 시공사: ${site}.` : "",
+        region ? `근무 지역: ${region}.` : "",
+        totalDays ? `총 적립일수: ${totalDays}일.` : "",
+        recentDays ? `최근 12개월 적립일수: ${recentDays}일.` : "",
+        "퇴직공제, 건강검진, 날씨, 응급실, 취업지원 지사를 쉽게 안내해줘."
+    ].filter(Boolean).join(" ");
+
+    sendMessage(message);
 }
 
 window.addEventListener("load", () => {
