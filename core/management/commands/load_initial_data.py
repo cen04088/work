@@ -8,7 +8,7 @@ from django.utils import timezone
 import requests
 
 from core.models import PublicDataSyncState
-from health.models import HealthClinic
+from health.models import HealthClinic, SafetyExcellentWorkplace
 from jobs.models import EmploymentSupportCenter
 from pension.models import PensionSite
 
@@ -24,6 +24,7 @@ SUPPORT_CENTERS = [
 ]
 SUPPORT_CENTER_API_URL = "https://api.odcloud.kr/api/15083034/v1/uddi:9260f361-85f4-4202-a08d-dc9b3b40ae8b"
 SUPPORT_CENTER_SOURCE_DATE = "2025-07-22"
+SAFETY_WORKPLACE_API_URL = "https://api.odcloud.kr/api/3038400/v1/uddi:cbdddc16-9fe8-48ab-8de6-a237d899752c_201403211011"
 
 
 class Command(BaseCommand):
@@ -50,6 +51,7 @@ class Command(BaseCommand):
         try:
             self.load_support_centers()
             self.load_clinics(force=options["force"] or options["daily_noon"])
+            self.load_safety_workplaces(force=options["force"] or options["daily_noon"])
             self.load_pension_sites(force=options["force"] or options["daily_noon"])
             state.last_synced_at = timezone.now()
             state.last_status = "success"
@@ -114,6 +116,35 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING(f"Support center API fallback used: {exc}"))
             return []
 
+    def fetch_safety_workplaces(self):
+        api_key = settings.PUBLIC_DATA_API_KEY
+        if not api_key:
+            return []
+
+        rows = []
+        page = 1
+        per_page = 1000
+        while True:
+            response = requests.get(
+                SAFETY_WORKPLACE_API_URL,
+                params={
+                    "page": page,
+                    "perPage": per_page,
+                    "returnType": "json",
+                    "serviceKey": api_key,
+                },
+                timeout=15,
+            )
+            response.raise_for_status()
+            payload = response.json()
+            data = payload.get("data", [])
+            rows.extend(data)
+            total_count = int(payload.get("totalCount") or len(rows))
+            if len(rows) >= total_count or not data:
+                break
+            page += 1
+        return rows
+
     def clean(self, value):
         return str(value or "").strip()
 
@@ -167,6 +198,37 @@ class Command(BaseCommand):
                 HealthClinic.objects.all().delete()
             HealthClinic.objects.bulk_create([row for row in rows if row.name], batch_size=500)
         self.stdout.write(self.style.SUCCESS(f"Health clinics loaded: {len(rows)}"))
+
+    def load_safety_workplaces(self, force=False):
+        if SafetyExcellentWorkplace.objects.exists() and not force:
+            self.stdout.write(f"Safety excellent workplaces already loaded: {SafetyExcellentWorkplace.objects.count()}")
+            return
+
+        try:
+            source_rows = self.fetch_safety_workplaces()
+        except Exception as exc:
+            self.stdout.write(self.style.WARNING(f"Safety workplace API skipped: {exc}"))
+            return
+
+        rows = []
+        for row in source_rows:
+            workplace_name = self.clean(row.get("사업장명"))
+            construction_site_name = self.clean(row.get("공사장명"))
+            if not workplace_name and not construction_site_name:
+                continue
+            rows.append(SafetyExcellentWorkplace(
+                post_number=self.clean(row.get("글번호")),
+                labor_office=self.clean(row.get("노동지청명")),
+                workplace_name=workplace_name or construction_site_name,
+                construction_site_name=construction_site_name,
+                recognized_date=self.clean(row.get("인정일")),
+            ))
+
+        with transaction.atomic():
+            if force:
+                SafetyExcellentWorkplace.objects.all().delete()
+            SafetyExcellentWorkplace.objects.bulk_create(rows, batch_size=500)
+        self.stdout.write(self.style.SUCCESS(f"Safety excellent workplaces loaded: {len(rows)}"))
 
     def load_pension_sites(self, force=False):
         if PensionSite.objects.exists() and not force:

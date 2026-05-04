@@ -8,6 +8,7 @@ urlpatterns = [
     path('weather/', views.WeatherNoticeView.as_view(), name='weather'),
     path('emergency/', views.EmergencyHelpView.as_view(), name='emergency'),
     path('api/clinics/', views.clinics_json, name='api_clinics'),
+    path('api/safety-workplaces/', views.safety_workplaces_json, name='api_safety_workplaces'),
     path('api/alerts/', views.safety_alerts_json, name='api_alerts'),
     path('api/weather/', views.weather_json, name='api_weather'),
     path('api/emergency-rooms/', views.emergency_rooms_json, name='api_emergency_rooms'),

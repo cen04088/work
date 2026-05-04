@@ -60,6 +60,44 @@ def clinics_json(request):
     return JsonResponse({"clinics": clinics})
 
 
+def safety_workplaces_json(request):
+    """위험성평가 결과 우수사업장 현황 검색."""
+    from django.db.models import Q
+    from .models import SafetyExcellentWorkplace
+
+    query = (request.GET.get("q") or "").strip()
+    labor_office = (request.GET.get("office") or "").strip()
+    qs = SafetyExcellentWorkplace.objects.all()
+
+    if query:
+        qs = qs.filter(
+            Q(workplace_name__icontains=query)
+            | Q(construction_site_name__icontains=query)
+            | Q(labor_office__icontains=query)
+        )
+    if labor_office:
+        qs = qs.filter(labor_office__icontains=labor_office)
+
+    total_count = SafetyExcellentWorkplace.objects.count()
+    results = [
+        {
+            "workplace_name": item.workplace_name,
+            "construction_site_name": item.construction_site_name,
+            "labor_office": item.labor_office,
+            "recognized_date": item.recognized_date,
+        }
+        for item in qs[:20]
+    ]
+
+    return JsonResponse({
+        "results": results,
+        "count": len(results),
+        "total_count": total_count,
+        "is_live_api": False,
+        "source": "한국산업안전보건공단_위험성평가 결과 우수사업장 현황",
+    })
+
+
 def _xml_items(xml_text):
     root = ElementTree.fromstring(xml_text)
     items = []

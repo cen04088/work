@@ -207,14 +207,19 @@ body.large-text-mode .data-freshness,
 body.large-text-mode .data-freshness strong,
 body.large-text-mode .health-benefit-hero p,
 body.large-text-mode .health-benefit-grid span,
-body.large-text-mode .health-apply-box p {
+body.large-text-mode .health-apply-box p,
+body.large-text-mode .safety-workplace-hero p,
+body.large-text-mode .safety-workplace-card p,
+body.large-text-mode .safety-workplace-card small {
   font-size: 18px;
 }
 
 body.large-text-mode .today-check-card strong,
 body.large-text-mode .home-ai-link strong,
 body.large-text-mode .home-scenario strong,
-body.large-text-mode .health-apply-box strong {
+body.large-text-mode .health-apply-box strong,
+body.large-text-mode .safety-workplace-hero strong,
+body.large-text-mode .safety-workplace-top strong {
   font-size: 21px;
 }
 
@@ -701,6 +706,95 @@ main { padding: 16px; }
   flex: 1;
   height: 46px;
   font-size: 14px;
+}
+
+.safety-workplace-section {
+  border-top: 4px solid var(--primary-light);
+}
+
+.safety-workplace-hero {
+  background: #F0F4FC;
+  border: 1px solid #D6E2F5;
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  margin-bottom: 12px;
+}
+
+.safety-workplace-hero strong {
+  display: block;
+  color: var(--primary);
+  font-size: var(--font-size-base);
+  line-height: 1.35;
+  margin-bottom: 4px;
+}
+
+.safety-workplace-hero p {
+  color: var(--text-sub);
+  font-size: var(--font-size-sm);
+  line-height: 1.55;
+  margin: 0;
+}
+
+.safety-note-box {
+  background: #FFFFFF;
+  margin-bottom: 14px;
+}
+
+.safety-search-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.safety-search-row .search-input {
+  margin-bottom: 0;
+}
+
+.safety-workplace-card {
+  background: #FFFFFF;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 13px;
+  margin-bottom: 8px;
+  box-shadow: var(--shadow-sm);
+}
+
+.safety-workplace-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 5px;
+}
+
+.safety-workplace-top strong {
+  color: var(--text);
+  font-size: var(--font-size-sm);
+  line-height: 1.35;
+}
+
+.safety-workplace-top span {
+  flex-shrink: 0;
+  background: #E0E9FF;
+  color: var(--primary);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.25;
+  padding: 4px 8px;
+}
+
+.safety-workplace-card p,
+.safety-workplace-card small {
+  display: block;
+  color: var(--text-sub);
+  font-size: var(--font-size-xs);
+  line-height: 1.45;
+  margin: 2px 0;
+}
+
+.empty-state.compact {
+  padding: 24px 16px;
 }
 
 .tool-section {

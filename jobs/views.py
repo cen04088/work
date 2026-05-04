@@ -42,8 +42,29 @@ def get_centers_json(request):
     
     qs = EmploymentSupportCenter.objects.all()
     if region:
-        # 권역 필터링
-        qs = qs.filter(Q(region__icontains=region) | Q(location__icontains=region))
+        region_groups = {
+            "수도권": ["서울", "경기", "인천"],
+            "강원권": ["강원"],
+            "충청권": ["대전", "세종", "충남", "충북"],
+            "호남권": ["광주", "전남", "전북"],
+            "호남": ["광주", "전남", "전북"],
+            "광주": ["광주", "전남", "전북"],
+            "전남": ["광주", "전남", "전북"],
+            "전북": ["광주", "전남", "전북"],
+            "대전": ["대전", "세종", "충남", "충북"],
+            "충청": ["대전", "세종", "충남", "충북"],
+            "부산": ["부산", "울산", "경남"],
+            "경남": ["부산", "울산", "경남"],
+            "부산·울산·경남권": ["부산", "울산", "경남"],
+            "대구·경북권": ["대구", "경북"],
+            "대구": ["대구", "경북"],
+            "경북": ["대구", "경북"],
+        }
+        keywords = region_groups.get(region, [region])
+        query = Q()
+        for keyword in keywords:
+            query |= Q(region__icontains=keyword) | Q(location__icontains=keyword)
+        qs = qs.filter(query)
         
     centers = []
     for c in qs:
@@ -60,10 +81,20 @@ def get_centers_json(request):
 
 
 def get_training_json(request):
-    """건설근로자공제회 건설기능인력 훈련기관 CSV 기반 조회."""
+    """건설근로자공제회 건설기능인력 훈련기관 CSV 기반 권역 조회."""
     region = request.GET.get("region", "").strip()
     today = date.today().isoformat()
     csv_path = Path(settings.BASE_DIR) / "data" / "건설근로자공제회_건설기능인력 훈련기관 정보_20250414.csv"
+    region_groups = {
+        "수도권": ["서울", "경기", "수원", "성남", "고양", "용인", "인천"],
+        "강원권": ["강원", "춘천", "원주", "강릉"],
+        "충청권": ["대전", "세종", "충남", "충북", "충청", "천안", "청주"],
+        "호남권": ["광주", "전남", "전라남도", "전북", "전라북도", "전북특별자치도"],
+        "대구·경북권": ["대구", "경북", "경상북도", "구미", "포항"],
+        "부산·울산·경남권": ["부산", "울산", "경남", "경상남도", "창원", "김해"],
+        "제주권": ["제주"],
+    }
+    keywords = region_groups.get(region, [region] if region else [])
 
     trainings = []
     try:
@@ -72,7 +103,7 @@ def get_training_json(request):
             for row in reader:
                 address = row.get("훈련기관 주소", "")
                 start_date = row.get("개시일", "")
-                if region and region not in address:
+                if keywords and not any(keyword in address for keyword in keywords):
                     continue
                 if start_date and start_date < today:
                     continue
@@ -90,4 +121,4 @@ def get_training_json(request):
         return JsonResponse({"trainings": [], "error": "훈련기관 CSV 파일을 찾을 수 없습니다."}, status=404)
 
     trainings.sort(key=lambda item: item["start"] or "9999-99-99")
-    return JsonResponse({"trainings": trainings[:10]})
+    return JsonResponse({"trainings": trainings[:20], "region": region})
