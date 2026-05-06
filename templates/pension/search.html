@@ -28,17 +28,6 @@
   </a>
 </section>
 
-<div class="data-freshness">
-  <strong>매일 12시 갱신</strong>
-  <span>
-    {% if public_data_synced_at %}
-    {{ public_data_synced_at|date:"Y.m.d H:i" }} 기준
-    {% else %}
-    가입현장 데이터 기준
-    {% endif %}
-  </span>
-</div>
-
 <!-- 검색 -->
 <p class="section-desc" style="margin-bottom: 8px;">일하고 계신 현장명 또는 시공사를 입력하면 퇴직공제 가입현장인지 확인할 수 있어요.</p>
 <div style="display: flex; gap: 8px;">
@@ -48,6 +37,12 @@
 </div>
 
 <div id="searchResults" style="margin-top: 16px;"></div>
+
+{% if public_data_synced_at %}
+<p class="home-sync-note">건설근로자공제회 퇴직공제 가입현장·복지 데이터 {{ public_data_synced_at|date:"Y.m.d H:i" }} 기준</p>
+{% else %}
+<p class="home-sync-note">건설근로자공제회 퇴직공제 가입현장·복지 데이터 기준</p>
+{% endif %}
 
 {% endblock %}
 

@@ -977,6 +977,111 @@ main { padding: 16px; }
   margin-top: 10px;
 }
 
+.msds-detail-panel {
+  margin-top: 12px;
+  border-top: 1px solid var(--border-light);
+  padding-top: 12px;
+}
+
+.msds-detail-head {
+  background: #FFF8E8;
+  border: 1px solid #F1DCA8;
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.msds-detail-head strong,
+.msds-detail-head span {
+  display: block;
+}
+
+.msds-detail-head strong {
+  color: var(--text);
+  font-size: var(--font-size-sm);
+  line-height: 1.35;
+}
+
+.msds-detail-head span {
+  color: var(--text-sub);
+  font-size: var(--font-size-xs);
+  line-height: 1.45;
+  margin-top: 3px;
+}
+
+.msds-detail-section {
+  background: #F8FAFC;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  margin-top: 10px;
+}
+
+.msds-detail-section h3 {
+  color: var(--primary);
+  font-size: var(--font-size-base);
+  line-height: 1.35;
+  margin: 0 0 4px;
+}
+
+.msds-detail-section > p {
+  color: var(--text-sub);
+  font-size: var(--font-size-xs);
+  line-height: 1.45;
+  margin: 0 0 10px;
+}
+
+.msds-detail-item {
+  background: #FFFFFF;
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  margin-top: 8px;
+}
+
+.msds-detail-item b {
+  display: block;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.35;
+  margin-bottom: 6px;
+}
+
+.msds-detail-item ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.msds-detail-item li {
+  color: var(--text-sub);
+  font-size: 12px;
+  line-height: 1.5;
+  padding: 5px 0 5px 12px;
+  position: relative;
+}
+
+.msds-detail-item li::before {
+  content: "";
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--primary);
+  position: absolute;
+  left: 0;
+  top: 13px;
+}
+
+.msds-detail-foot,
+.msds-detail-error {
+  color: var(--warning);
+  background: var(--warning-light);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  margin-top: 10px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
 .safety-workplace-section {
   border-top: 4px solid var(--primary-light);
 }

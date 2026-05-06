@@ -70,6 +70,12 @@
   </div>
 </section>
 
+{% if public_data_synced_at %}
+<p class="home-sync-note">기상청·국립중앙의료원·한국산업안전보건공단 데이터와 공공데이터 {{ public_data_synced_at|date:"Y.m.d H:i" }} 기준</p>
+{% else %}
+<p class="home-sync-note">기상청·국립중앙의료원·한국산업안전보건공단 공공데이터 기준</p>
+{% endif %}
+
 {% endblock %}
 
 {% block extra_js %}

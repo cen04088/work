@@ -12,6 +12,7 @@ urlpatterns = [
     path('api/clinics/', views.clinics_json, name='api_clinics'),
     path('api/safety-workplaces/', views.safety_workplaces_json, name='api_safety_workplaces'),
     path('api/msds/', views.msds_search_json, name='api_msds'),
+    path('api/msds-detail/', views.msds_detail_json, name='api_msds_detail'),
     path('api/alerts/', views.safety_alerts_json, name='api_alerts'),
     path('api/weather/', views.weather_json, name='api_weather'),
     path('api/emergency-rooms/', views.emergency_rooms_json, name='api_emergency_rooms'),

@@ -47,17 +47,6 @@
     </div>
   </div>
 
-  <div class="data-freshness">
-    <strong>매일 12시 갱신</strong>
-    <span>
-      {% if public_data_synced_at %}
-        {{ public_data_synced_at|date:"Y.m.d H:i" }} 기준
-      {% else %}
-        검진기관 데이터 기준
-      {% endif %}
-    </span>
-  </div>
-
   <p class="section-desc" style="margin-bottom: 8px;">가까운 권역을 선택하면 검진기관 목록을 보여줍니다.</p>
   <select id="regionSelect" class="search-input" onchange="loadClinics()">
     <option value="">권역을 선택해주세요</option>
@@ -77,6 +66,12 @@
     </div>
   </div>
 </section>
+
+{% if public_data_synced_at %}
+<p class="home-sync-note">건설근로자공제회 종합건강검진 수검기관 데이터 {{ public_data_synced_at|date:"Y.m.d H:i" }} 기준</p>
+{% else %}
+<p class="home-sync-note">건설근로자공제회 종합건강검진 수검기관 데이터 기준</p>
+{% endif %}
 
 {% endblock %}
 

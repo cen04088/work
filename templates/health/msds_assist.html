@@ -70,6 +70,8 @@
   </div>
 </section>
 
+<p class="home-sync-note">한국산업안전보건공단 물질안전보건자료 조회 서비스 기준</p>
+
 {% endblock %}
 
 {% block extra_js %}
@@ -94,6 +96,77 @@ function escapeHtml(value) {
       .replaceAll(">", "&gt;")
       .replaceAll('"', "&quot;")
       .replaceAll("'", "&#039;");
+}
+
+function renderDetailLines(lines) {
+    if (!lines || lines.length === 0) return "";
+    return `<ul>${lines.map(line => `<li>${escapeHtml(line)}</li>`).join("")}</ul>`;
+}
+
+async function loadMsdsDetail(chemId, name) {
+    const panel = document.getElementById(`msds-detail-${chemId}`);
+    if (!panel) return;
+
+    if (panel.dataset.loaded === "true") {
+        panel.hidden = !panel.hidden;
+        return;
+    }
+
+    panel.hidden = false;
+    panel.innerHTML = '<div class="spinner"></div><div class="loading-msg">대처 방법을 불러오고 있습니다...</div>';
+
+    try {
+        const res = await fetch(`/health/api/msds-detail/?chem_id=${encodeURIComponent(chemId)}`);
+        const data = await res.json();
+
+        if (!res.ok) {
+            panel.innerHTML = `
+              <div class="msds-detail-error">
+                ${escapeHtml(data.error || "상세 자료를 불러오지 못했습니다.")}
+              </div>`;
+            return;
+        }
+
+        if (!data.sections || data.sections.length === 0) {
+            panel.innerHTML = `
+              <div class="msds-detail-error">
+                앱에서 바로 보여줄 상세 항목이 없습니다. 현장 책임자에게 물질명과 번호를 보여주세요.
+              </div>`;
+            return;
+        }
+
+        let html = `
+          <div class="msds-detail-head">
+            <strong>${escapeHtml(name)} 대처 요약</strong>
+            <span>공식 MSDS 항목을 쉬운 순서로 정리했어요.</span>
+          </div>`;
+
+        data.sections.forEach(section => {
+            html += `
+              <div class="msds-detail-section">
+                <h3>${escapeHtml(section.title)}</h3>
+                <p>${escapeHtml(section.description)}</p>
+                ${section.items.map(item => `
+                  <div class="msds-detail-item">
+                    <b>${escapeHtml(item.label)}</b>
+                    ${renderDetailLines(item.lines)}
+                  </div>
+                `).join("")}
+              </div>`;
+        });
+
+        html += `
+          <div class="msds-detail-foot">
+            급한 증상이 있거나 흡입·화상·눈 접촉이 있으면 검색을 멈추고 119 또는 현장 책임자에게 바로 알리세요.
+          </div>`;
+        panel.innerHTML = html;
+        panel.dataset.loaded = "true";
+    } catch (e) {
+        panel.innerHTML = `
+          <div class="msds-detail-error">
+            상세 자료를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.
+          </div>`;
+    }
 }
 
 async function searchMsds() {
@@ -139,6 +212,8 @@ async function searchMsds() {
         let html = `<p class="mini-caption">공식 안전자료 후보 ${data.results.length}건</p>`;
         data.results.forEach(item => {
             const name = escapeHtml(item.name || "물질명 미공개");
+            const rawName = item.name || "물질명 미공개";
+            const chemId = escapeHtml(item.chem_id || "");
             const cas = escapeHtml(item.cas_no || "-");
             const lastDate = escapeHtml(item.last_date || "갱신일 미공개");
             const subCodes = [item.ke_no, item.en_no, item.un_no].filter(Boolean).map(escapeHtml).join(" · ") || "관리번호 미공개";
@@ -151,10 +226,11 @@ async function searchMsds() {
                 <p>라벨 번호: ${cas}</p>
                 <p>추가 번호: ${subCodes}</p>
                 <div class="msds-care-box">
-                  <b>이 결과를 어떻게 쓰나요?</b>
-                  <span>물질 이름과 번호를 현장 책임자에게 보여주세요. 보호구, 응급조치, 누출 대처는 공식 상세 자료와 관리자 지시를 함께 확인해야 합니다.</span>
+                  <b>바로 확인할 수 있어요</b>
+                  <span>위험 표시, 몸에 닿았을 때, 새거나 쏟아졌을 때, 필요한 보호구를 앱 안에서 먼저 확인하세요.</span>
                 </div>
-                <a class="map-link-btn msds-official-link" href="${data.official_url}" target="_blank">공식 상세자료 보기</a>
+                <button type="button" class="map-link-btn msds-official-link" data-chem-id="${chemId}" data-name="${escapeHtml(rawName)}" onclick="loadMsdsDetail(this.dataset.chemId, this.dataset.name)">대처 방법 보기</button>
+                <div id="msds-detail-${chemId}" class="msds-detail-panel" hidden></div>
               </div>`;
         });
         container.innerHTML = html;

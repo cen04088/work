@@ -1,3 +1,4 @@
+import re
 import requests
 from math import atan2, cos, radians, sin, sqrt
 from django.conf import settings
@@ -164,6 +165,138 @@ def msds_search_json(request):
         return JsonResponse(payload)
     except Exception as exc:
         return _api_error(_safe_api_error("MSDS", exc))
+
+
+MSDS_DETAIL_SECTIONS = {
+    "02": {
+        "title": "위험 표시",
+        "description": "라벨에서 먼저 확인해야 할 위험 문구입니다.",
+        "labels": ("신호어", "유해·위험문구", "유해성·위험성 분류", "대응", "예방"),
+    },
+    "04": {
+        "title": "몸에 닿았거나 마셨을 때",
+        "description": "사람에게 노출됐을 때 바로 확인할 응급조치입니다.",
+        "labels": ("눈에 들어갔을 때", "피부에 접촉했을 때", "흡입했을 때", "먹었을 때", "기타 의사의 주의사항"),
+    },
+    "05": {
+        "title": "불이 났을 때",
+        "description": "불꽃, 담배, 전기공구 사용 전 확인할 내용입니다.",
+        "labels": ("적절한 소화제", "화학물질로부터 생기는 특정 유해성", "화재진압 시 착용할 보호구 및 예방조치"),
+    },
+    "06": {
+        "title": "새거나 쏟아졌을 때",
+        "description": "누출 사고 때 접근, 환기, 정리 전 확인할 내용입니다.",
+        "labels": ("인체를 보호하기 위해 필요한 조치사항 및 보호구", "환경을 보호하기 위해 필요한 조치사항", "정화 또는 제거 방법"),
+    },
+    "08": {
+        "title": "필요한 보호구",
+        "description": "마스크, 장갑, 보안경처럼 착용해야 할 보호구입니다.",
+        "labels": ("호흡기 보호", "눈 보호", "손 보호", "신체 보호", "적절한 공학적 관리"),
+    },
+}
+
+
+def msds_detail_json(request):
+    """KOSHA 물질안전보건자료 상세 항목을 현장용으로 묶어 제공."""
+    chem_id = (request.GET.get("chem_id") or "").strip()
+    if not chem_id:
+        return JsonResponse({"sections": [], "error": "화학물질 번호가 필요합니다."}, status=400)
+
+    api_key = getattr(settings, "MSDS_API_KEY", "") or _public_data_key("kosha")
+    if not api_key:
+        return JsonResponse({"sections": [], "error": "MSDS_API_KEY 또는 PUBLIC_DATA_API_KEY가 필요합니다."}, status=503)
+
+    cache_key = f"msds-detail:{chem_id}"
+    cached = cache.get(cache_key)
+    if cached:
+        return JsonResponse(cached)
+
+    try:
+        sections = []
+        for detail_no, meta in MSDS_DETAIL_SECTIONS.items():
+            items = _fetch_msds_detail_items(api_key, chem_id, detail_no)
+            section_items = _shape_msds_section_items(items, meta["labels"])
+            if section_items:
+                sections.append({
+                    "key": detail_no,
+                    "title": meta["title"],
+                    "description": meta["description"],
+                    "items": section_items,
+                })
+
+        payload = {
+            "chem_id": chem_id,
+            "sections": sections,
+            "count": len(sections),
+            "is_live_api": True,
+            "source": "한국산업안전보건공단_물질안전보건자료",
+            "official_url": "https://msds.kosha.or.kr/MSDSInfo/kcic/msdssearchMsds.do",
+        }
+        cache.set(cache_key, payload, 60 * 60 * 24)
+        return JsonResponse(payload)
+    except Exception as exc:
+        return JsonResponse({"sections": [], "error": _safe_api_error("MSDS 상세", exc)}, status=502)
+
+
+def _fetch_msds_detail_items(api_key, chem_id, detail_no):
+    response = requests.get(
+        f"https://apis.data.go.kr/B552468/msdschem/getChemDetail{detail_no}",
+        params={
+            "serviceKey": api_key,
+            "chemId": chem_id,
+            "numOfRows": "100",
+            "pageNo": "1",
+        },
+        timeout=8,
+    )
+    response.raise_for_status()
+    root = ElementTree.fromstring(response.text)
+    result_code = root.findtext(".//resultCode", "")
+    result_msg = root.findtext(".//resultMsg", "")
+    if result_code and result_code != "00":
+        raise ValueError(result_msg or f"MSDS 상세 {detail_no} 응답 오류")
+    return _xml_items(response.text)
+
+
+def _shape_msds_section_items(items, preferred_labels):
+    by_label = {
+        _clean_msds_text(item.get("msdsItemNameKor")): item
+        for item in items
+        if _clean_msds_text(item.get("msdsItemNameKor"))
+    }
+    ordered = []
+    for label in preferred_labels:
+        if label in by_label:
+            ordered.append(by_label[label])
+    if len(ordered) < 4:
+        ordered.extend(item for item in items if item not in ordered)
+
+    shaped = []
+    for item in ordered:
+        label = _clean_msds_text(item.get("msdsItemNameKor"))
+        lines = _split_msds_detail(item.get("itemDetail"))
+        if not label or not lines:
+            continue
+        shaped.append({"label": label, "lines": lines[:5]})
+        if len(shaped) >= 5:
+            break
+    return shaped
+
+
+def _split_msds_detail(value):
+    lines = []
+    for raw_line in str(value or "").replace("\r", "\n").split("|"):
+        line = _clean_msds_text(raw_line)
+        if not line or line in ("자료없음", "해당없음", "없음"):
+            continue
+        if len(line) > 130:
+            line = line[:127].rstrip() + "..."
+        lines.append(line)
+    return lines
+
+
+def _clean_msds_text(value):
+    return re.sub(r"\s+", " ", str(value or "")).strip()
 
 
 def _xml_items(xml_text):
