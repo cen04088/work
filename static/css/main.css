@@ -2220,33 +2220,55 @@ body.large-text-mode .chat-briefing-toggle {
 }
 
 .home-ai-link {
-  display: block;
-  background: #FFFFFF;
-  border: 1px solid #D6E2F5;
-  border-left: 4px solid var(--primary-light);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  background: #1B3D6F;
+  border: 1px solid #1B3D6F;
   border-radius: var(--radius-md);
-  padding: 14px 16px;
+  padding: 16px;
   margin-top: 16px;
   text-decoration: none;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 8px 20px rgba(27, 61, 111, 0.18);
 }
 
 .home-ai-link span,
-.home-ai-link strong {
+.home-ai-link strong,
+.home-ai-link em {
   display: block;
 }
 
 .home-ai-link span {
-  color: var(--primary-light);
+  color: #BFD1EA;
   font-size: 12px;
   font-weight: 900;
   margin-bottom: 3px;
 }
 
 .home-ai-link strong {
-  color: var(--text);
-  font-size: 15px;
+  color: #FFFFFF;
+  font-size: 16px;
   line-height: 1.45;
+}
+
+.home-ai-link em {
+  flex-shrink: 0;
+  min-width: 56px;
+  height: 40px;
+  border-radius: 20px;
+  background: #FFFFFF;
+  color: var(--primary);
+  font-style: normal;
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 40px;
+  text-align: center;
+}
+
+.home-ai-link:active {
+  transform: scale(0.98);
+  background: var(--primary-dark);
 }
 
 .home-ai-link-prominent {
