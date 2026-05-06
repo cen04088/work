@@ -32,24 +32,18 @@
   <strong>매일 12시 갱신</strong>
   <span>
     {% if public_data_synced_at %}
-      {{ public_data_synced_at|date:"Y.m.d H:i" }} 기준
+    {{ public_data_synced_at|date:"Y.m.d H:i" }} 기준
     {% else %}
-      가입현장 데이터 기준
+    가입현장 데이터 기준
     {% endif %}
   </span>
 </div>
 
 <!-- 검색 -->
-<p class="section-desc" style="margin-bottom: 8px;">일하고 계신 현장명 또는 시공사를 입력해보세요.</p>
+<p class="section-desc" style="margin-bottom: 8px;">일하고 계신 현장명 또는 시공사를 입력하면 퇴직공제 가입현장인지 확인할 수 있어요.</p>
 <div style="display: flex; gap: 8px;">
-  <input
-    type="text"
-    id="searchInput"
-    class="search-input"
-    placeholder="현장명 또는 시공사 입력"
-    style="margin-bottom: 0; flex: 1;"
-    onkeypress="if(event.key==='Enter') searchSites()"
-  >
+  <input type="text" id="searchInput" class="search-input" placeholder="현장명 또는 시공사 입력"
+    style="margin-bottom: 0; flex: 1;" onkeypress="if(event.key==='Enter') searchSites()">
   <button onclick="searchSites()" class="form-action-btn">검색</button>
 </div>
 
@@ -59,24 +53,24 @@
 
 {% block extra_js %}
 <script>
-async function searchSites() {
+  async function searchSites() {
     const q = document.getElementById("searchInput").value.trim();
     if (q.length < 2) {
-        alert("검색어를 2글자 이상 입력해주세요.");
-        return;
+      alert("검색어를 2글자 이상 입력해주세요.");
+      return;
     }
-    
+
     const resultsDiv = document.getElementById("searchResults");
     resultsDiv.innerHTML = '<div class="spinner"></div><div class="loading-msg">검색 중입니다...</div>';
-    
+
     try {
-        const res = await fetch(`/pension/api/search/?q=${encodeURIComponent(q)}`);
-        const data = await res.json();
-        
-        if (data.results && data.results.length > 0) {
-            let html = `<p style="font-size:13px; font-weight:700; color:var(--text-sub); margin-bottom:10px;">검색 결과 ${data.results.length}건</p>`;
-            data.results.forEach(site => {
-                html += `
+      const res = await fetch(`/pension/api/search/?q=${encodeURIComponent(q)}`);
+      const data = await res.json();
+
+      if (data.results && data.results.length > 0) {
+        let html = `<p style="font-size:13px; font-weight:700; color:var(--text-sub); margin-bottom:10px;">검색 결과 ${data.results.length}건</p>`;
+        data.results.forEach(site => {
+          html += `
                 <div class="job-card">
                   <div class="company">${site.project}</div>
                   <div class="meta" style="margin-top: 6px;">🏢 시공사: ${site.company}</div>
@@ -89,22 +83,22 @@ async function searchSites() {
                   </div>
                 </div>
                 `;
-            });
-            resultsDiv.innerHTML = html;
-        } else {
-            resultsDiv.innerHTML = `
+        });
+        resultsDiv.innerHTML = html;
+      } else {
+        resultsDiv.innerHTML = `
               <div class="empty-state">
                 <div class="empty-icon">-</div>
                 <p>가입현장을 찾지 못했습니다.<br>현장명 일부나 시공사명으로 다시 검색해보세요.</p>
               </div>`;
-        }
+      }
     } catch (e) {
-        resultsDiv.innerHTML = `
+      resultsDiv.innerHTML = `
           <div class="empty-state">
             <div class="empty-icon">!</div>
             <p style="color: var(--warning);">가입현장 정보를 불러오지 못했습니다.<br>잠시 후 다시 검색해주세요.</p>
           </div>`;
     }
-}
+  }
 </script>
 {% endblock %}
