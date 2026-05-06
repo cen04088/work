@@ -2069,6 +2069,22 @@ body.large-text-mode .chat-briefing-toggle {
   color: var(--primary-light);
 }
 
+.today-check-icon.emergency {
+  background: var(--warning-light);
+  color: var(--warning);
+}
+
+.today-check-icon.msds {
+  background: #EEF2F7;
+  color: #1A1A2E;
+}
+
+.safety-menu-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
 .today-check-card strong {
   display: block;
   color: var(--text);

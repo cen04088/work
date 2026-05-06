@@ -40,21 +40,21 @@
   
   <!-- 하단 탭바 -->
   <nav class="bottom-nav">
+    <a href="{% url 'core:home' %}" class="{% if request.resolver_match.app_name == 'core' %}active{% endif %}">
+      <span class="icon">✓</span>
+      <span>오늘</span>
+    </a>
     <a href="{% url 'jobs:list' %}" class="{% if request.resolver_match.app_name == 'jobs' %}active{% endif %}">
       <span class="icon">💼</span>
       <span>일자리</span>
     </a>
-    <a href="{% url 'health:map' %}" class="{% if request.resolver_match.app_name == 'health' %}active{% endif %}">
-      <span class="icon">🏥</span>
-      <span>건강·안전</span>
+    <a href="{% url 'health:safety' %}" class="{% if request.resolver_match.app_name == 'health' and request.resolver_match.url_name != 'map' %}active{% endif %}">
+      <span class="icon">!</span>
+      <span>안전</span>
     </a>
-    <a href="{% url 'pension:search' %}" class="{% if request.resolver_match.app_name == 'pension' %}active{% endif %}">
+    <a href="{% url 'pension:search' %}" class="{% if request.resolver_match.app_name == 'pension' or request.resolver_match.app_name == 'health' and request.resolver_match.url_name == 'map' %}active{% endif %}">
       <span class="icon">💰</span>
-      <span>퇴직공제</span>
-    </a>
-    <a href="{% url 'chatbot:chat' %}" class="{% if request.resolver_match.app_name == 'chatbot' %}active{% endif %}">
-      <span class="icon">💬</span>
-      <span>AI상담</span>
+      <span>공제·복지</span>
     </a>
   </nav>
 

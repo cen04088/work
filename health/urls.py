@@ -4,6 +4,7 @@ from . import views
 app_name = 'health'
 
 urlpatterns = [
+    path('safety/', views.SafetyDashboardView.as_view(), name='safety'),
     path('map/', views.ClinicMapView.as_view(), name='map'),
     path('weather/', views.WeatherNoticeView.as_view(), name='weather'),
     path('emergency/', views.EmergencyHelpView.as_view(), name='emergency'),

@@ -15,6 +15,10 @@ class WeatherNoticeView(TemplateView):
     template_name = 'health/weather.html'
 
 
+class SafetyDashboardView(TemplateView):
+    template_name = 'health/safety.html'
+
+
 class EmergencyHelpView(TemplateView):
     template_name = 'health/emergency_help.html'
 

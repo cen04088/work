@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}건강·안전{% endblock %}
+{% block title %}무료 건강검진{% endblock %}
 {% block header_title %}무료 건강검진 안내{% endblock %}
 
 {% block content %}
@@ -58,12 +58,6 @@
     </span>
   </div>
 
-  <a href="{% url 'health:msds' %}" class="msds-entry-link">
-    <span>MSDS</span>
-    <strong>화학물질 대처 확인</strong>
-    <small>라벨 사진과 물질명으로 공식 안전보건자료를 조회합니다.</small>
-  </a>
-
   <p class="section-desc" style="margin-bottom: 8px;">가까운 권역을 선택하면 검진기관 목록을 보여줍니다.</p>
   <select id="regionSelect" class="search-input" onchange="loadClinics()">
     <option value="">권역을 선택해주세요</option>
@@ -80,38 +74,6 @@
     <div class="empty-state">
       <div class="empty-icon">+</div>
       <p>권역을 선택하면<br>검진기관 목록이 표시됩니다.</p>
-    </div>
-  </div>
-</section>
-
-<section class="tool-section safety-workplace-section">
-  <div class="tool-section-head">
-    <h2>안전 우수사업장 확인</h2>
-    <span>참고 정보</span>
-  </div>
-
-  <div class="safety-workplace-hero">
-    <strong>위험성평가 인정 이력</strong>
-    <p>사업장명이나 공사장명으로 한국산업안전보건공단 위험성평가 결과 우수사업장 현황을 확인할 수 있습니다.</p>
-  </div>
-
-  <div class="info-box safety-note-box">
-    <div class="info-title">확인할 때 참고하세요</div>
-    <ul>
-      <li>인정 사업장은 인정 결정일부터 3년간 유효한 것으로 안내됩니다.</li>
-      <li>현장 안전을 보증하는 표시는 아니므로, 출근 전 안전교육과 보호구 확인은 별도로 필요합니다.</li>
-      <li>공사장명이 비어 있으면 본사 또는 지점 단위로 공개된 자료일 수 있습니다.</li>
-    </ul>
-  </div>
-
-  <div class="safety-search-row">
-    <input id="safetyWorkplaceQuery" class="search-input" type="search" placeholder="업체명 또는 공사장명 입력">
-    <button type="button" class="form-action-btn" onclick="loadSafetyWorkplaces()">검색</button>
-  </div>
-  <div id="safetyWorkplaceList">
-    <div class="empty-state compact">
-      <div class="empty-icon">✓</div>
-      <p>업체명이나 공사장명을 입력하면<br>인정 이력을 찾아드립니다.</p>
     </div>
   </div>
 </section>
@@ -172,69 +134,5 @@ async function loadClinics() {
     }
 }
 
-async function loadSafetyWorkplaces() {
-    const input = document.getElementById("safetyWorkplaceQuery");
-    const listContainer = document.getElementById("safetyWorkplaceList");
-    const query = (input.value || "").trim();
-
-    if (query.length < 2) {
-        listContainer.innerHTML = `
-          <div class="empty-state compact">
-            <div class="empty-icon">!</div>
-            <p>검색어를 2글자 이상 입력해주세요.</p>
-          </div>`;
-        input.focus();
-        return;
-    }
-
-    listContainer.innerHTML = '<div class="spinner"></div><div class="loading-msg">우수사업장 현황을 확인하고 있습니다...</div>';
-
-    try {
-        const res = await fetch(`/health/api/safety-workplaces/?q=${encodeURIComponent(query)}`);
-        const data = await res.json();
-
-        if (data.results && data.results.length > 0) {
-            let listHtml = `<p class="mini-caption">검색 결과 ${data.results.length}곳</p>`;
-            data.results.forEach(item => {
-                const siteName = item.construction_site_name || "공사장명 미공개";
-                const date = item.recognized_date || "인정일 미공개";
-                const office = item.labor_office || "관할 지청 미공개";
-                listHtml += `
-                  <div class="safety-workplace-card">
-                    <div class="safety-workplace-top">
-                      <strong>${item.workplace_name}</strong>
-                      <span>${date}</span>
-                    </div>
-                    <p>${siteName}</p>
-                    <small>${office}</small>
-                  </div>`;
-            });
-            listContainer.innerHTML = listHtml;
-        } else {
-            listContainer.innerHTML = `
-              <div class="empty-state compact">
-                <div class="empty-icon">-</div>
-                <p>검색 결과가 없습니다.<br>업체명 일부나 공사장명으로 다시 검색해보세요.</p>
-              </div>`;
-        }
-    } catch (e) {
-        listContainer.innerHTML = `
-          <div class="empty-state compact">
-            <div class="empty-icon">!</div>
-            <p style="color: var(--warning);">우수사업장 현황을 불러오지 못했습니다.</p>
-          </div>`;
-    }
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-    const input = document.getElementById("safetyWorkplaceQuery");
-    if (!input) return;
-    input.addEventListener("keydown", event => {
-        if (event.key === "Enter") {
-            event.preventDefault();
-            loadSafetyWorkplaces();
-        }
-    });
-});
 </script>
 {% endblock %}
