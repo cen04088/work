@@ -47,9 +47,10 @@
         <option value="3">KE 번호</option>
         <option value="4">EN 번호</option>
       </select>
-      <input id="msdsKeyword" class="search-input" type="search" placeholder="예: 시너, 톨루엔, 71-43-2">
+      <input id="msdsKeyword" class="search-input" type="search" placeholder="예: 톨루엔, 아세톤, 71-43-2">
     </div>
     <button type="button" class="btn-primary" onclick="searchMsds()">안전자료 찾기</button>
+    <p class="msds-search-help">제품명으로 안 나오면 라벨의 성분명이나 CAS 번호로 검색해보세요.</p>
   </div>
 
   <div class="msds-action-list">
@@ -138,7 +139,7 @@ async function loadMsdsDetail(chemId, name) {
         let html = `
           <div class="msds-detail-head">
             <strong>${escapeHtml(name)} 대처 요약</strong>
-            <span>공식 MSDS 항목을 쉬운 순서로 정리했어요.</span>
+            <span>현장에서 바로 볼 내용만 골라 짧게 정리했어요.</span>
           </div>`;
 
         data.sections.forEach(section => {
@@ -217,6 +218,7 @@ async function searchMsds() {
             const cas = escapeHtml(item.cas_no || "-");
             const lastDate = escapeHtml(item.last_date || "갱신일 미공개");
             const subCodes = [item.ke_no, item.en_no, item.un_no].filter(Boolean).map(escapeHtml).join(" · ") || "관리번호 미공개";
+            const matchNote = item.match_note ? `<p class="msds-match-note">${escapeHtml(item.match_note)}</p>` : "";
             html += `
               <div class="msds-result-card">
                 <div class="msds-result-top">
@@ -225,6 +227,7 @@ async function searchMsds() {
                 </div>
                 <p>라벨 번호: ${cas}</p>
                 <p>추가 번호: ${subCodes}</p>
+                ${matchNote}
                 <div class="msds-care-box">
                   <b>바로 확인할 수 있어요</b>
                   <span>위험 표시, 몸에 닿았을 때, 새거나 쏟아졌을 때, 필요한 보호구를 앱 안에서 먼저 확인하세요.</span>

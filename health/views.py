@@ -1,3 +1,4 @@
+import html
 import re
 import requests
 from math import atan2, cos, radians, sin, sqrt
@@ -144,9 +145,16 @@ def msds_search_json(request):
 
         results = []
         for item in root.findall(".//item"):
+            name = _display_msds_name(item.findtext("chemNameKor", ""))
+            original_name = _clean_msds_text(item.findtext("chemNameKor", ""))
+            match_note = ""
+            if search_type == "0" and keyword not in name and keyword in original_name:
+                match_note = "검색어가 관용명이나 영문명에서 발견된 결과입니다. 라벨의 제품명·성분명과 맞는지 한 번 더 확인하세요."
             results.append({
                 "chem_id": item.findtext("chemId", ""),
-                "name": item.findtext("chemNameKor", ""),
+                "name": name,
+                "original_name": original_name,
+                "match_note": match_note,
                 "cas_no": item.findtext("casNo", ""),
                 "ke_no": item.findtext("keNo", ""),
                 "en_no": item.findtext("enNo", ""),
@@ -169,29 +177,39 @@ def msds_search_json(request):
 
 MSDS_DETAIL_SECTIONS = {
     "02": {
-        "title": "위험 표시",
-        "description": "라벨에서 먼저 확인해야 할 위험 문구입니다.",
-        "labels": ("신호어", "유해·위험문구", "유해성·위험성 분류", "대응", "예방"),
+        "title": "얼마나 위험한가요?",
+        "description": "라벨에서 먼저 볼 위험 표시만 짧게 정리했어요.",
+        "labels": ("신호어", "유해·위험문구", "유해성·위험성 분류"),
+        "max_items": 3,
+        "max_lines": 3,
     },
     "04": {
-        "title": "몸에 닿았거나 마셨을 때",
-        "description": "사람에게 노출됐을 때 바로 확인할 응급조치입니다.",
-        "labels": ("눈에 들어갔을 때", "피부에 접촉했을 때", "흡입했을 때", "먹었을 때", "기타 의사의 주의사항"),
+        "title": "몸에 닿았을 때",
+        "description": "눈, 피부, 흡입처럼 바로 조치가 필요한 상황입니다.",
+        "labels": ("눈에 들어갔을 때", "피부에 접촉했을 때", "흡입했을 때", "먹었을 때"),
+        "max_items": 4,
+        "max_lines": 3,
     },
     "05": {
         "title": "불이 났을 때",
-        "description": "불꽃, 담배, 전기공구 사용 전 확인할 내용입니다.",
+        "description": "불꽃이나 전기공구 사용 전 확인하세요.",
         "labels": ("적절한 소화제", "화학물질로부터 생기는 특정 유해성", "화재진압 시 착용할 보호구 및 예방조치"),
+        "max_items": 3,
+        "max_lines": 3,
     },
     "06": {
         "title": "새거나 쏟아졌을 때",
-        "description": "누출 사고 때 접근, 환기, 정리 전 확인할 내용입니다.",
+        "description": "가까이 가기 전, 치우기 전 먼저 볼 내용입니다.",
         "labels": ("인체를 보호하기 위해 필요한 조치사항 및 보호구", "환경을 보호하기 위해 필요한 조치사항", "정화 또는 제거 방법"),
+        "max_items": 3,
+        "max_lines": 3,
     },
     "08": {
-        "title": "필요한 보호구",
-        "description": "마스크, 장갑, 보안경처럼 착용해야 할 보호구입니다.",
-        "labels": ("호흡기 보호", "눈 보호", "손 보호", "신체 보호", "적절한 공학적 관리"),
+        "title": "무엇을 착용해야 하나요?",
+        "description": "마스크, 장갑, 보안경처럼 필요한 보호구입니다.",
+        "labels": ("호흡기 보호", "눈 보호", "손 보호", "신체 보호"),
+        "max_items": 4,
+        "max_lines": 2,
     },
 }
 
@@ -215,7 +233,12 @@ def msds_detail_json(request):
         sections = []
         for detail_no, meta in MSDS_DETAIL_SECTIONS.items():
             items = _fetch_msds_detail_items(api_key, chem_id, detail_no)
-            section_items = _shape_msds_section_items(items, meta["labels"])
+            section_items = _shape_msds_section_items(
+                items,
+                meta["labels"],
+                meta.get("max_items", 4),
+                meta.get("max_lines", 3),
+            )
             if section_items:
                 sections.append({
                     "key": detail_no,
@@ -258,7 +281,7 @@ def _fetch_msds_detail_items(api_key, chem_id, detail_no):
     return _xml_items(response.text)
 
 
-def _shape_msds_section_items(items, preferred_labels):
+def _shape_msds_section_items(items, preferred_labels, max_items=4, max_lines=3):
     by_label = {
         _clean_msds_text(item.get("msdsItemNameKor")): item
         for item in items
@@ -277,8 +300,8 @@ def _shape_msds_section_items(items, preferred_labels):
         lines = _split_msds_detail(item.get("itemDetail"))
         if not label or not lines:
             continue
-        shaped.append({"label": label, "lines": lines[:5]})
-        if len(shaped) >= 5:
+        shaped.append({"label": _easy_msds_label(label), "lines": lines[:max_lines]})
+        if len(shaped) >= max_items:
             break
     return shaped
 
@@ -286,17 +309,87 @@ def _shape_msds_section_items(items, preferred_labels):
 def _split_msds_detail(value):
     lines = []
     for raw_line in str(value or "").replace("\r", "\n").split("|"):
-        line = _clean_msds_text(raw_line)
+        line = _easy_msds_line(raw_line)
         if not line or line in ("자료없음", "해당없음", "없음"):
             continue
-        if len(line) > 130:
-            line = line[:127].rstrip() + "..."
+        if _is_low_value_msds_line(line):
+            continue
+        if len(line) > 86:
+            line = line[:83].rstrip() + "..."
         lines.append(line)
     return lines
 
 
 def _clean_msds_text(value):
-    return re.sub(r"\s+", " ", str(value or "")).strip()
+    text = html.unescape(html.unescape(str(value or "")))
+    text = re.sub(r"<br\s*/?>", " ", text, flags=re.IGNORECASE)
+    text = re.sub(r"<[^>]+>", " ", text)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def _display_msds_name(value):
+    text = _clean_msds_text(value)
+    text = re.sub(r"\(\s*관용명\s*:.*$", "", text).strip()
+    korean_head = re.match(r"^([가-힣0-9·,\-\s]+)", text)
+    if korean_head and korean_head.group(1).strip():
+        return korean_head.group(1).strip()
+    return text
+
+
+def _easy_msds_label(label):
+    return {
+        "유해·위험문구": "주의할 점",
+        "유해성·위험성 분류": "위험 종류",
+        "인체를 보호하기 위해 필요한 조치사항 및 보호구": "사람을 먼저 보호",
+        "환경을 보호하기 위해 필요한 조치사항": "하수구·물길 주의",
+        "정화 또는 제거 방법": "치우는 방법",
+        "적절한(부적절한) 소화제": "불 끌 때",
+        "화재진압 시 착용할 보호구 및 예방조치": "불 끌 때 주의",
+        "화학물질로부터 생기는 특정 유해성": "불이 나면 생길 위험",
+    }.get(label, label)
+
+
+def _easy_msds_line(value):
+    line = _clean_msds_text(value)
+    line = re.sub(r"^[HP]\d{3}(?:\+[HP]\d{3})*\s*:\s*", "", line)
+
+    easy_patterns = (
+        ("격리식 전면형 방독마스크", "유기용제용 방독마스크처럼 물질에 맞는 호흡 보호구를 착용하세요."),
+        ("산소가 부족한 경우", "산소가 부족한 곳은 들어가지 말고, 송기마스크나 공기호흡기가 필요합니다."),
+        ("눈의 자극을 일으키거나", "보안경이나 통기성 보안경을 착용하세요."),
+        ("근로자가 접근이 용이한 위치에 긴급세척시설", "가까운 곳에 세안설비나 비상 샤워가 있는지 확인하세요."),
+        ("엎질러진 것을 즉시 닦아내고", "보호구를 착용한 뒤 흘린 물질을 정리하세요."),
+        ("적절한 보호의를 착용하지 않고", "보호복 없이 새는 용기나 흘린 물질을 만지지 마세요."),
+        ("물질과 접촉시 즉시 20분 이상", "피부나 눈에 닿으면 흐르는 물로 20분 이상 씻으세요."),
+        ("구강대구강법으로 인공호흡을 하지 말고", "입으로 직접 인공호흡하지 말고 구조장비를 사용하세요."),
+        ("타는 동안 열분해 또는 연소에 의해", "불이 나면 자극적이거나 유독한 연기가 날 수 있습니다."),
+        ("이 물질과 관련된 소화시 알콜 포말", "불을 끌 때는 알코올포말, 이산화탄소, 물분무를 사용할 수 있습니다."),
+        ("질식소화시 건조한 모래 또는 흙", "작은 불은 마른 모래나 흙으로 덮어 끌 수 있습니다."),
+    )
+    for pattern, replacement in easy_patterns:
+        if pattern in line:
+            return replacement
+
+    line = line.replace("의학적인 조치/조언", "진료나 상담")
+    line = line.replace("의학적인 조치·조언", "진료나 상담")
+    line = line.replace("보호장갑/보호의/보안경/안면보호구", "보호장갑, 보호복, 보안경, 얼굴 보호구")
+    line = line.replace("물/…(으)로", "물로")
+    line = line.replace("…을(를)", "노출된 부위를")
+    line = line.replace("…처치를", "필요한 처치를")
+    line = re.sub(r"\(알려진 특정한 영향을.*", "", line).strip()
+    line = re.sub(r"\s*:\s*", ": ", line)
+    return line
+
+
+def _is_low_value_msds_line(line):
+    low_value_patterns = (
+        "사용 전 취급 설명서를 확보",
+        "모든 안전 예방조치 문구를 읽고",
+        "노출되는 기체/액체의 물리화학적 특성",
+        "공기수준을 노출기준 이하",
+        "의료인력이 해당물질에 대해 인지",
+    )
+    return any(pattern in line for pattern in low_value_patterns)
 
 
 def _xml_items(xml_text):

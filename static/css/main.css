@@ -890,6 +890,21 @@ main { padding: 16px; }
   margin-bottom: 0;
 }
 
+.msds-search-help,
+.msds-match-note {
+  color: var(--text-sub);
+  font-size: var(--font-size-xs);
+  line-height: 1.45;
+  margin: 8px 0 0;
+}
+
+.msds-match-note {
+  background: #FFF8E8;
+  border-radius: var(--radius-sm);
+  color: #7A5B16;
+  padding: 8px 10px;
+}
+
 .msds-action-list strong {
   display: block;
   color: var(--primary);
