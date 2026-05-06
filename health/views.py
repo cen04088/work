@@ -1,4 +1,5 @@
 import html
+import json
 import re
 import requests
 from math import atan2, cos, radians, sin, sqrt
@@ -175,6 +176,43 @@ def msds_search_json(request):
         return _api_error(_safe_api_error("MSDS", exc))
 
 
+def msds_photo_extract_json(request):
+    """라벨 사진에서 제품명과 번호 후보를 추출한다.
+
+    추출 결과는 바로 공식 MSDS 조회에 사용하지 않고, 사용자가 확인한 뒤
+    기존 msds_search_json 흐름으로 넘기는 것을 전제로 한다.
+    """
+    if request.method != "POST":
+        return JsonResponse({"error": "POST만 허용합니다."}, status=405)
+
+    image = request.FILES.get("image")
+    if not image:
+        return JsonResponse({"error": "라벨 사진이 필요합니다."}, status=400)
+    if image.size > 6 * 1024 * 1024:
+        return JsonResponse({"error": "사진 용량은 6MB 이하로 올려주세요."}, status=400)
+    if not settings.GEMINI_API_KEY:
+        return JsonResponse({"error": "GEMINI_API_KEY가 필요합니다."}, status=503)
+
+    mime_type = _safe_image_mime(image.content_type)
+    if not mime_type:
+        return JsonResponse({"error": "jpg, png, webp 사진만 사용할 수 있습니다."}, status=400)
+
+    try:
+        image_bytes = image.read()
+        extracted = _extract_msds_label_with_gemini(image_bytes, mime_type)
+        suggested_searches = _build_msds_suggested_searches(extracted)
+        return JsonResponse({
+            "status": "ok",
+            "candidates": extracted,
+            "suggested_searches": suggested_searches,
+            "best_search": suggested_searches[0] if suggested_searches else None,
+            "needs_confirmation": True,
+            "notice": "AI가 읽은 후보입니다. 라벨과 맞는지 확인한 뒤 검색하세요.",
+        })
+    except Exception as exc:
+        return JsonResponse({"error": _safe_api_error("라벨 사진 분석", exc)}, status=502)
+
+
 MSDS_DETAIL_SECTIONS = {
     "02": {
         "title": "얼마나 위험한가요?",
@@ -279,6 +317,163 @@ def _fetch_msds_detail_items(api_key, chem_id, detail_no):
     if result_code and result_code != "00":
         raise ValueError(result_msg or f"MSDS 상세 {detail_no} 응답 오류")
     return _xml_items(response.text)
+
+
+def _safe_image_mime(content_type):
+    allowed = {
+        "image/jpeg": "image/jpeg",
+        "image/jpg": "image/jpeg",
+        "image/png": "image/png",
+        "image/webp": "image/webp",
+    }
+    return allowed.get(str(content_type or "").lower())
+
+
+def _extract_msds_label_with_gemini(image_bytes, mime_type):
+    from google import genai
+    from google.genai import types
+
+    prompt = """
+건설현장 화학물질 용기 라벨 사진에서 MSDS 검색에 쓸 후보만 추출하세요.
+반드시 JSON만 출력하세요.
+형식:
+{
+  "product_names": ["제품명 후보"],
+  "material_names": ["성분명/물질명 후보"],
+  "cas_numbers": ["00-00-0"],
+  "un_numbers": ["UN0000"],
+  "ke_numbers": ["KE-00000"],
+  "en_numbers": ["ENCS-..."],
+  "signal_words": ["위험", "경고"],
+  "hazard_pictograms": ["인화성", "부식성", "독성", "건강유해성"],
+  "confidence": "high|medium|low",
+  "reason": "짧은 근거"
+}
+라벨에서 확실하지 않은 값은 넣지 마세요.
+CAS 번호는 숫자-숫자-숫자 형식만 넣으세요.
+"""
+    client = genai.Client(api_key=settings.GEMINI_API_KEY)
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=[
+            types.Content(
+                role="user",
+                parts=[
+                    types.Part.from_text(text=prompt),
+                    types.Part.from_bytes(data=image_bytes, mime_type=mime_type),
+                ],
+            )
+        ],
+        config=types.GenerateContentConfig(temperature=0.1),
+    )
+    raw_text = response.text or ""
+    parsed = _parse_json_object(raw_text)
+    return _normalize_msds_extraction(parsed, raw_text)
+
+
+def _parse_json_object(text):
+    match = re.search(r"\{.*\}", text or "", flags=re.DOTALL)
+    if not match:
+        return {}
+    try:
+        return json.loads(match.group(0))
+    except json.JSONDecodeError:
+        return {}
+
+
+def _normalize_msds_extraction(payload, raw_text=""):
+    cas_from_text = _valid_cas_numbers(raw_text)
+    cas_numbers = _valid_cas_numbers(" ".join(_as_list(payload.get("cas_numbers"))))
+    cas_numbers = _unique_values(cas_numbers + cas_from_text)
+
+    return {
+        "product_names": _clean_candidate_list(payload.get("product_names"), 4),
+        "material_names": _clean_candidate_list(payload.get("material_names"), 4),
+        "cas_numbers": cas_numbers[:4],
+        "un_numbers": _clean_code_list(payload.get("un_numbers"), r"^(?:UN)?\d{4}$", 4),
+        "ke_numbers": _clean_code_list(payload.get("ke_numbers"), r"^KE-\d{5,}$", 4),
+        "en_numbers": _clean_candidate_list(payload.get("en_numbers"), 4),
+        "signal_words": _clean_candidate_list(payload.get("signal_words"), 2),
+        "hazard_pictograms": _clean_candidate_list(payload.get("hazard_pictograms"), 4),
+        "confidence": payload.get("confidence") if payload.get("confidence") in {"high", "medium", "low"} else "low",
+        "reason": _clean_msds_text(payload.get("reason"))[:80],
+    }
+
+
+def _build_msds_suggested_searches(extracted):
+    suggestions = []
+    source_map = (
+        ("cas_numbers", "1", "CAS 번호"),
+        ("product_names", "0", "제품명"),
+        ("material_names", "0", "물질명"),
+        ("un_numbers", "2", "UN 번호"),
+        ("ke_numbers", "3", "KE 번호"),
+        ("en_numbers", "4", "EN 번호"),
+    )
+    for key, search_type, label in source_map:
+        for value in extracted.get(key, []):
+            suggestions.append({
+                "type": search_type,
+                "type_label": label,
+                "value": value,
+                "confidence": extracted.get("confidence", "low"),
+            })
+    return suggestions[:8]
+
+
+def _as_list(value):
+    if isinstance(value, list):
+        return value
+    if value in (None, ""):
+        return []
+    return [value]
+
+
+def _clean_candidate_list(value, limit):
+    candidates = []
+    for item in _as_list(value):
+        text = _clean_msds_text(item)
+        if len(text) < 2 or len(text) > 80:
+            continue
+        candidates.append(text)
+    return _unique_values(candidates)[:limit]
+
+
+def _clean_code_list(value, pattern, limit):
+    results = []
+    for item in _as_list(value):
+        text = _clean_msds_text(item).upper().replace(" ", "")
+        if re.match(pattern, text):
+            results.append(text)
+    return _unique_values(results)[:limit]
+
+
+def _valid_cas_numbers(text):
+    results = []
+    for match in re.findall(r"\b\d{2,7}-\d{2}-\d\b", text or ""):
+        if _is_valid_cas(match):
+            results.append(match)
+    return _unique_values(results)
+
+
+def _is_valid_cas(value):
+    digits = value.replace("-", "")
+    check_digit = int(digits[-1])
+    body = digits[:-1][::-1]
+    total = sum(int(digit) * (index + 1) for index, digit in enumerate(body))
+    return total % 10 == check_digit
+
+
+def _unique_values(values):
+    seen = set()
+    unique = []
+    for value in values:
+        key = str(value).strip()
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        unique.append(key)
+    return unique
 
 
 def _shape_msds_section_items(items, preferred_labels, max_items=4, max_lines=3):

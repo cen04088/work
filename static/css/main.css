@@ -879,6 +879,125 @@ main { padding: 16px; }
   margin-top: 8px;
 }
 
+.msds-photo-extract {
+  margin-top: 10px;
+}
+
+.msds-photo-confirm,
+.msds-photo-error {
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  line-height: 1.45;
+  padding: 11px 12px;
+}
+
+.msds-photo-confirm {
+  background: #F7FAFF;
+  border: 1px solid #D6E2F5;
+}
+
+.msds-photo-error {
+  background: #FFFBF9;
+  border: 1px solid #F2C2BC;
+  color: var(--warning);
+}
+
+.msds-photo-confirm b,
+.msds-photo-confirm span {
+  display: block;
+}
+
+.msds-photo-confirm b {
+  color: var(--primary);
+  font-size: var(--font-size-sm);
+}
+
+.msds-photo-confirm span {
+  color: var(--text-sub);
+  margin-top: 2px;
+}
+
+.msds-photo-confirm small {
+  display: block;
+  color: var(--text-sub);
+  font-size: 12px;
+  line-height: 1.45;
+  margin-top: 5px;
+}
+
+.msds-ai-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.msds-ai-tags span {
+  background: var(--warning-light);
+  border-radius: 999px;
+  color: var(--warning);
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.25;
+  padding: 5px 9px;
+}
+
+.msds-best-search-btn {
+  width: 100%;
+  min-height: 44px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--primary);
+  color: #FFFFFF;
+  cursor: pointer;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 14px;
+  font-weight: 900;
+  margin-top: 10px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.msds-best-search-btn:active {
+  background: var(--primary-dark);
+  transform: scale(0.98);
+}
+
+.msds-candidate-group {
+  margin-top: 10px;
+}
+
+.msds-candidate-group strong {
+  display: block;
+  color: var(--text);
+  font-size: 13px;
+  margin-bottom: 5px;
+}
+
+.msds-candidate-group div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.msds-candidate-group button {
+  border: 1px solid #C5D3EE;
+  border-radius: 999px;
+  background: #FFFFFF;
+  color: var(--primary);
+  cursor: pointer;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 7px 10px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.msds-candidate-group button:active {
+  background: #E0E9FF;
+  transform: scale(0.97);
+}
+
 .msds-search-grid {
   display: grid;
   grid-template-columns: 112px 1fr;

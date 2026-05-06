@@ -27,13 +27,15 @@
 
   <div class="msds-photo-panel">
     <label for="msdsPhoto" class="msds-photo-button">
-      <strong>라벨 사진으로 확인하기</strong>
-      <span>통에 적힌 제품명이나 숫자 번호가 보이게 찍어두세요.</span>
+      <strong>AI로 라벨 사진 분석하기</strong>
+      <span>제품명, CAS 번호, 위험표시 후보를 읽고 공식 MSDS 검색으로 연결합니다.</span>
     </label>
     <input id="msdsPhoto" type="file" accept="image/*" capture="environment" hidden>
+    {% csrf_token %}
     <div id="msdsPreviewWrap" class="msds-preview-wrap" style="display:none;">
       <img id="msdsPreview" alt="촬영한 라벨 미리보기">
-      <p>사진에서 제품명, 물질 이름, 숫자 번호를 보고 아래에 입력하세요.</p>
+      <p>AI가 제품명과 번호 후보를 읽습니다. 라벨과 맞는지 확인한 뒤 검색하세요.</p>
+      <div id="msdsPhotoExtract" class="msds-photo-extract"></div>
     </div>
   </div>
 
@@ -87,6 +89,7 @@ if (photoInput) {
         if (!file) return;
         previewImage.src = URL.createObjectURL(file);
         previewWrap.style.display = "block";
+        extractMsdsFromPhoto(file);
     });
 }
 
@@ -102,6 +105,118 @@ function escapeHtml(value) {
 function renderDetailLines(lines) {
     if (!lines || lines.length === 0) return "";
     return `<ul>${lines.map(line => `<li>${escapeHtml(line)}</li>`).join("")}</ul>`;
+}
+
+function getCsrfToken() {
+    const el = document.querySelector("[name=csrfmiddlewaretoken]");
+    return el ? el.value : "";
+}
+
+async function extractMsdsFromPhoto(file) {
+    const panel = document.getElementById("msdsPhotoExtract");
+    if (!panel) return;
+
+    panel.innerHTML = '<div class="loading-msg">라벨 사진에서 제품명과 번호를 읽고 있습니다...</div>';
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    try {
+        const res = await fetch("/health/api/msds-photo/", {
+            method: "POST",
+            headers: { "X-CSRFToken": getCsrfToken() },
+            credentials: "same-origin",
+            body: formData,
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+            panel.innerHTML = `
+              <div class="msds-photo-error">
+                ${escapeHtml(data.error || "사진 분석을 사용할 수 없습니다.")}<br>
+                제품명이나 번호를 직접 입력해 검색하세요.
+              </div>`;
+            return;
+        }
+
+        panel.innerHTML = renderPhotoCandidates(data.candidates || {}, data.best_search, data.suggested_searches || []);
+    } catch (e) {
+        panel.innerHTML = `
+          <div class="msds-photo-error">
+            사진 분석에 실패했습니다. 제품명이나 번호를 직접 입력해 검색하세요.
+          </div>`;
+    }
+}
+
+function renderCandidateButtons(title, values, type) {
+    if (!values || values.length === 0) return "";
+    return `
+      <div class="msds-candidate-group">
+        <strong>${escapeHtml(title)}</strong>
+        <div>
+          ${values.map(value => `
+            <button type="button" data-type="${escapeHtml(type)}" data-value="${escapeHtml(value)}" onclick="useMsdsCandidateFromButton(this)">
+              ${escapeHtml(value)}
+            </button>
+          `).join("")}
+        </div>
+      </div>`;
+}
+
+function renderPhotoCandidates(candidates, bestSearch, suggestedSearches) {
+    const html = [
+        renderCandidateButtons("CAS 번호", candidates.cas_numbers, "1"),
+        renderCandidateButtons("제품명", candidates.product_names, "0"),
+        renderCandidateButtons("물질명", candidates.material_names, "0"),
+        renderCandidateButtons("UN 번호", candidates.un_numbers, "2"),
+        renderCandidateButtons("KE 번호", candidates.ke_numbers, "3"),
+        renderCandidateButtons("EN 번호", candidates.en_numbers, "4"),
+    ].join("");
+
+    if (!html) {
+        return `
+          <div class="msds-photo-error">
+            사진에서 확실한 후보를 찾지 못했습니다. 라벨을 더 밝게 찍거나 직접 입력하세요.
+          </div>`;
+    }
+
+    const confidence = candidates.confidence === "high" ? "높음" : candidates.confidence === "medium" ? "보통" : "낮음";
+    const bestButton = bestSearch ? `
+      <button type="button" class="msds-best-search-btn" data-type="${escapeHtml(bestSearch.type)}" data-value="${escapeHtml(bestSearch.value)}" onclick="useMsdsCandidateFromButton(this)">
+        추천 후보로 공식자료 찾기
+      </button>` : "";
+    const hazardTags = [
+        ...(candidates.signal_words || []).map(value => `신호어: ${value}`),
+        ...(candidates.hazard_pictograms || []).map(value => `표시: ${value}`),
+    ];
+    const hazardHtml = hazardTags.length ? `
+      <div class="msds-ai-tags">
+        ${hazardTags.map(value => `<span>${escapeHtml(value)}</span>`).join("")}
+      </div>` : "";
+    const suggestionNote = suggestedSearches && suggestedSearches.length
+      ? `<small>후보 ${suggestedSearches.length}개를 찾았습니다. CAS 번호가 있으면 CAS 검색을 우선 권장합니다.</small>`
+      : "";
+    return `
+      <div class="msds-photo-confirm">
+        <b>멀티모달 AI 분석 결과</b>
+        <span>정확도 ${confidence}. 라벨과 맞는 값을 확인한 뒤 공식자료를 조회하세요.</span>
+        ${suggestionNote}
+        ${hazardHtml}
+        ${bestButton}
+        ${html}
+      </div>`;
+}
+
+function useMsdsCandidate(type, value) {
+    const searchType = document.getElementById("msdsSearchType");
+    const keywordInput = document.getElementById("msdsKeyword");
+    if (searchType) searchType.value = type;
+    if (keywordInput) keywordInput.value = value;
+    searchMsds();
+}
+
+function useMsdsCandidateFromButton(button) {
+    useMsdsCandidate(button.dataset.type, button.dataset.value);
 }
 
 async function loadMsdsDetail(chemId, name) {
